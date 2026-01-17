@@ -3,14 +3,14 @@
 Define your technical stack below. This serves as a reference for all team members and helps maintain consistency across the project.
 
 ### Framework & Runtime
-- **Application Framework:** [e.g., Rails, Django, Next.js, Express]
-- **Language/Runtime:** [e.g., Ruby, Python, Node.js, Java]
-- **Package Manager:** [e.g., bundler, pip, npm, yarn]
+- **Application Framework:** [e.g., FastAPI, Next.js, Express]
+- **Language/Runtime:** [e.g., Python, Node.js]
+- **Package Manager:** [e.g., python uv, npm, yarn]
 
 ### Frontend
-- **JavaScript Framework:** [e.g., React, Vue, Svelte, Alpine, vanilla JS]
-- **CSS Framework:** [e.g., Tailwind CSS, Bootstrap, custom]
-- **UI Components:** [e.g., shadcn/ui, Material UI, custom library]
+- **JavaScript Framework:** [e.g., React]
+- **CSS Framework:** [e.g., Tailwind CSS]
+- **UI Components:** [e.g., shadcn/ui, Material UI]
 
 ### Database & Storage
 - **Database:** [e.g., PostgreSQL, MySQL, MongoDB]
