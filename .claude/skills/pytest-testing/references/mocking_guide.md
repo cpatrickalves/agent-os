@@ -3,28 +3,21 @@
 
 > **Reference versions:** Python 3.12+ | pytest 8+ | pytest-mock 3.15+
 
----
+## Table of Contents
 
-## Quick Decision Tree
+Use `grep` patterns to jump to sections:
 
-```
-Need to substitute something in a test?
-│
-├─► Environment variable or simple config?
-│   └─► Use MONKEYPATCH
-│
-├─► Need to verify IF/HOW it was called?
-│   └─► Use PYTEST-MOCK (mocker)
-│
-├─► Complex object with multiple methods?
-│   └─► Use PYTEST-MOCK (mocker)
-│
-├─► Outside pytest (pure unittest)?
-│   └─► Use UNITTEST.MOCK directly
-│
-└─► Not sure?
-    └─► Use PYTEST-MOCK (most complete)
-```
+| Section | Grep Pattern | Line Range |
+|---------|-------------|------------|
+| Monkeypatch API & examples | `## 1. Monkeypatch` | ~30-100 |
+| pytest-mock API & examples | `## 2. pytest-mock` | ~100-285 |
+| unittest.mock patterns | `## 3. unittest.mock` | ~285-360 |
+| Comparison table | `## 4. Complete Comparison` | ~360-380 |
+| Best practices & anti-patterns | `## 5. Patterns and Anti` | ~380-460 |
+| Async testing (pytest-asyncio) | `## 6. Async Testing` | ~460-745 |
+| Ready recipes (datetime, files, classes) | `## 7. Ready Recipes` | ~745-825 |
+| Decision checklist | `## 8. Decision Checklist` | ~825-845 |
+| Recommended configuration | `## 9. Recommended Configuration` | ~845-920 |
 
 ---
 
@@ -460,58 +453,7 @@ def test_leak():
 
 ## 6. Async Testing with pytest-asyncio
 
-### Configuration
-
-Configure pytest-asyncio in `pyproject.toml`:
-
-```toml
-[tool.pytest.ini_options]
-asyncio_mode = "auto"  # Recommended for asyncio-only projects
-asyncio_default_fixture_loop_scope = "function"
-```
-
-| Mode | Behavior |
-|------|----------|
-| `auto` | Auto-detects async tests, no markers needed |
-| `strict` | Requires explicit `@pytest.mark.asyncio` marker |
-
-### Basic Async Test
-
-```python
-# With asyncio_mode = "auto" (no marker needed)
-async def test_fetch_data():
-    result = await fetch_data()
-    assert result == "expected"
-
-# With asyncio_mode = "strict" (marker required)
-import pytest
-
-@pytest.mark.asyncio
-async def test_fetch_data():
-    result = await fetch_data()
-    assert result == "expected"
-```
-
-### Async Fixtures
-
-```python
-import pytest_asyncio
-
-@pytest_asyncio.fixture
-async def db_connection():
-    """Create async database connection."""
-    conn = await create_connection()
-    yield conn
-    await conn.close()
-
-@pytest_asyncio.fixture
-async def authenticated_client():
-    """Create authenticated HTTP client."""
-    client = AsyncClient()
-    await client.login("user", "pass")
-    yield client
-    await client.logout()
-```
+> **Basic async config and fixtures** are covered in SKILL.md. This section covers advanced async mocking patterns.
 
 ### Mocking Async Functions
 
@@ -619,54 +561,6 @@ async def test_async_iterator(mocker):
         items.extend(page["items"])
 
     assert items == [1, 2, 3, 4]
-```
-
-### Event Loop Scopes
-
-Control event loop lifecycle for better performance:
-
-```python
-import pytest
-
-# Module scope - all tests share one event loop
-pytestmark = pytest.mark.asyncio(loop_scope="module")
-
-async def test_first():
-    # Runs in shared module loop
-    pass
-
-async def test_second():
-    # Same event loop as test_first
-    pass
-
-
-# Class scope
-@pytest.mark.asyncio(loop_scope="class")
-class TestAsyncOperations:
-    async def test_one(self):
-        pass
-
-    async def test_two(self):
-        # Same loop as test_one
-        pass
-```
-
-### Fixture Loop Scope
-
-```python
-import pytest_asyncio
-
-# Session loop, cached per module
-@pytest_asyncio.fixture(loop_scope="session", scope="module")
-async def expensive_resource():
-    resource = await create_expensive_resource()
-    yield resource
-    await resource.cleanup()
-
-# Module loop, fresh per function
-@pytest_asyncio.fixture(loop_scope="module")
-async def per_test_resource():
-    return await setup_resource()
 ```
 
 ### Testing with httpx/aiohttp
