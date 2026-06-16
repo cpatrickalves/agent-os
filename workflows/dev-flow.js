@@ -6,6 +6,7 @@ export const meta = {
     { title: 'Development', detail: 'implementa o plano, commita e abre PR para a branch dev', model: 'sonnet' },
     { title: 'Code Review', detail: '2 revisores em paralelo (thermos + ce-code-review, ambos Opus) e consolidação dos relatórios' },
     { title: 'PR Fixes', detail: 'julga cada achado, aplica as correções procedentes e atualiza o PR', model: 'sonnet' },
+    { title: 'Docs Audit', detail: 'auditoria de documentação da branch com a skill docs-generator (sincronia /docs + ADRs/guides)', model: 'opus' },
   ],
 }
 
@@ -94,8 +95,8 @@ const fixes = await agent(
     `O resultado da revisão está em ${consolidated.report_path}. ` +
     'Use a skill superpowers:brainstorming e analise cada item da revisão, veja o que faz sentido corrigir ' +
     'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +
-    'Após julgar o que deve ser corrigido, planeje e aplique as alterações (usando subagents), faça os commits ' +
-    'e atualize o PR (adicionando comentários com os fixes aplicados e suas justificativas).',
+    'Após julgar o que deve ser corrigido, planeje e aplique as alterações (usando subagents), faça os commits, push para o PR ' +
+    'e atualize o PR adicionando comentários somente dos fixes aplicados e suas justificativas (nao precisa mencionar os rejeitados.',
   {
     label: 'pr-fixes',
     phase: 'PR Fixes',
@@ -112,9 +113,46 @@ const fixes = await agent(
   },
 )
 
+// ── Etapa 4: Docs Audit ─────────────────────────────────────────────────────
+phase('Docs Audit')
+
+const docsAudit = await agent(
+  `Use a skill /docs-generator (via Skill tool) sobre o PR ${dev.pr_url}. ` +
+    'Realize uma auditoria minuciosa nas alterações desta branch seguindo estas diretrizes:\n' +
+    '- Verificação de Sincronia: Analise todos os arquivos alterados no PR e verifique se a pasta /docs foi atualizada ' +
+    "corretamente em conformidade com as diretrizes e padrões da skill 'docs-generator'.\n" +
+    '- Extração de Conhecimento: Identifique decisões arquiteturais, mudanças de lógica complexa ou trade-offs importantes ' +
+    'que não estejam documentados. Transfira esses achados para um formato de documentação oficial, preferencialmente ' +
+    'seguindo o modelo de ADR (Architecture Decision Records) ou atualizando os guias técnicos existentes.\n' +
+    '- Lista de verificação: Confirmação de que o docs-generator foi aplicado corretamente em todos os módulos impactados. ' +
+    'Seja criterioso, focando na manutenibilidade e na clareza para futuros desenvolvedores.\n' +
+    '- Considere que arquivos git-ignored em `docs` não entrarão na versão final do projeto (são temporários), então ' +
+    'achados importantes têm que virar documentação (ex: ADRs, README, Guides, References, etc.).\n' +
+    '- Ao promover uma solution para ADR (quando a investigação revelar uma decisão arquitetural), o ADR deve ser **self-contained**.\n' +
+    '- Também não faça referências a Issues do Linear ou Plane no Código (ex: "feito de acordo com DEV-88", "EVABOT-XX"), ' +
+    'pois não serão acessíveis após a entrega do software. Somente docs versionadas (ADRs, guides, etc.) devem ser referenciadas.\n' +
+    '\n' +
+    'Ao final, commite e faça push das atualizações de documentação para o PR.',
+  {
+    label: 'docs-audit',
+    phase: 'Docs Audit',
+    model: 'opus',
+    schema: {
+      type: 'object',
+      properties: {
+        docs_updated: { type: 'array', items: { type: 'string' }, description: 'Arquivos de documentação criados ou atualizados' },
+        adrs_created: { type: 'array', items: { type: 'string' }, description: 'ADRs promovidos a partir de achados da auditoria' },
+        summary: { type: 'string', description: 'Resumo da auditoria de documentação' },
+      },
+      required: ['summary'],
+    },
+  },
+)
+
 return {
   pr_url: dev.pr_url,
   review_reports: reportPaths,
   consolidated_report: consolidated.report_path,
   fixes,
+  docs_audit: docsAudit,
 }
