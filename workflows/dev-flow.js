@@ -118,6 +118,9 @@ phase('Docs Audit')
 
 const docsAudit = await agent(
   `Use a skill /docs-generator (via Skill tool) sobre o PR ${dev.pr_url}. ` +
+    `O plano de implementação que originou esta branch está em: ${planPath}. ` +
+    `Contexto: as etapas anteriores de code review e correção já rodaram. Resumo dos fixes aplicados no PR: ${fixes?.summary ?? 'n/d'}. ` +
+    `Fixes aplicados: ${fixes?.applied?.length ? fixes.applied.join('; ') : 'nenhum registrado'}. ` +
     'Realize uma auditoria minuciosa nas alterações desta branch seguindo estas diretrizes:\n' +
     '- Verificação de Sincronia: Analise todos os arquivos alterados no PR e verifique se a pasta /docs foi atualizada ' +
     "corretamente em conformidade com as diretrizes e padrões da skill 'docs-generator'.\n" +
