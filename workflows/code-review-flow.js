@@ -70,8 +70,10 @@ const finalReview = await agent(
     `O resultado da revisão está em ${consolidated.report_path}. ` +
     'Use a skill /grill-with-docs e analise cada item da revisão, veja o que faz sentido corrigir ' +
     'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +
-    'Após julgar o que deve ser corrigido, gere um arquivo markdown final da revisão do PR na raiz do projeto "pr-review-xxxx.md" ' +
-    'e use a skill /html-it para gerar uma versão HTML do "pr-review-xxxx.md" (para melhor legilibidade) também na raiz do projeto. ' +
+    'Após julgar o que deve ser corrigido, gere um arquivo markdown final da revisão do PR na raiz do projeto "pr-review-xxxx.md". ' +
+    'IMPORTANTE: o documento final deve conter APENAS os itens que devem ser corrigidos (os achados procedentes); ' +
+    'não inclua os achados descartados/rejeitados (overengineering, premissas incorretas, falsos positivos, etc.). ' +
+    'Em seguida use a skill /html-it para gerar uma versão HTML do "pr-review-xxxx.md" (para melhor legilibidade) também na raiz do projeto. ' +
     'ultrathink.',
   {
     label: 'final-review',
