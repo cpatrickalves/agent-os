@@ -1,7 +1,8 @@
 export const meta = {
   name: 'code-review-flow',
   description: 'Code review duplo (thermos + ce-code-review, ambos Opus) de um PR e consolidação dos relatórios',
-  whenToUse: 'Quando quiser revisar um PR existente sem implementar nada. Uso: Workflow({name: "code-review-flow", args: "<PR url ou número>"})',
+  whenToUse:
+    'Quando quiser revisar um PR existente sem implementar nada. Uso: Workflow({name: "code-review-flow", args: "<PR url ou número>"})',
   phases: [
     { title: 'Code Review', detail: '2 revisores em paralelo (thermos + ce-code-review, ambos Opus) e consolidação dos relatórios' },
     { title: 'Final Review', detail: 'julga os achados com grill-with-docs e gera o relatório final em markdown + HTML (html-it) na raiz do projeto', model: 'opus' },
