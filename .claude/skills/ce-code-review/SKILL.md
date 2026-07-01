@@ -2,7 +2,9 @@
 name: ce-code-review
 description: "Structured code review for bugs, regressions, tests, and standards. Use before PRs or when asked for review; interactive mode can fix locally, while mode:agent reports only for pipeline callers."
 argument-hint: "[mode:agent] [blank to review current branch, or provide PR link]"
-source: "https://github.com/EveryInc/compound-engineering-plugin/tree/main/skills/ce-code-review"
+disable-model-invocation: true
+metadata:
+  source: "https://github.com/EveryInc/compound-engineering-plugin/tree/main/skills/ce-code-review"
 ---
 
 # Code Review
@@ -24,8 +26,6 @@ Parse `$ARGUMENTS` for optional tokens. Strip each recognized token before inter
 | Token | Example | Effect |
 |-------|---------|--------|
 | `mode:agent` | `mode:agent` | **Report-only**: return **JSON** instead of markdown tables and skip the Stage 5c apply (the caller applies). Does not change reviewer selection, merge logic, or scope rules (see Output format) |
-| `mode:headless` | `mode:headless` | **Deprecated alias** for `mode:agent` |
-| `mode:report-only` | `mode:report-only` | **Deprecated — ignored.** Former no-artifacts mode; default behavior is review-only without checkout |
 | `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Diff base on the **current checkout** (explicit; skips auto base detection) |
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Plan file for requirements verification (explicit). Supports markdown and HTML unified plans. |
 | `depth:full` | `depth:full` | **Force the full reviewer roster** — skip the Stage 3c small-diff lite path so every always-on persona runs regardless of diff size. Use when a deep/thorough review is explicitly requested (the one escalation signal Stage 3c cannot infer from the diff). Does not change conditional selection, merge, or scope. |
@@ -36,14 +36,15 @@ Parse `$ARGUMENTS` for optional tokens. Strip each recognized token before inter
 
 **Grouping is presentation, not a mode.** The `grouping:` tokens change how the finding set is organized for triage — never reviewer selection, merge logic, scope rules, or the Stage 5c apply decision.
 
-**Mode alias:** `mode:headless` normalizes to `mode:agent`. `mode:agent` + `mode:headless` is not a conflict.
+**Deprecated tokens (recognized for back-compat, never a conflict):**
+- `mode:headless` — alias for `mode:agent` (normalizes to it; the `mode:agent`/`mode:headless` pair is not a conflict).
+- `mode:report-only` — ignored (former no-artifacts mode; default is already review-only without checkout).
+- `mode:autofix` — ignored; proceed with the normal flow (default applies safe fixes via Stage 5c, `mode:agent` reports and the caller applies).
 
 **Conflicting arguments:** Stop without dispatching reviewers when:
 - Multiple incompatible scope selectors appear together (e.g. `base:` **and** a PR number/branch target — `base:` means "review the current checkout against this base")
 - Multiple distinct `mode:` tokens other than the `mode:agent`/`mode:headless` alias pair
 - Multiple distinct `grouping:` tokens (e.g. `grouping:off` **and** `grouping:always`)
-
-Deprecated `mode:autofix` is **not** a conflict — ignore the token and proceed with the normal flow (see below).
 
 Emit a one-line failure reason. In `mode:agent`, return JSON: `{"status":"failed","reason":"..."}`.
 
@@ -51,7 +52,7 @@ Emit a one-line failure reason. In `mode:agent`, return JSON: `{"status":"failed
 
 Same pipeline for default and `mode:agent`:
 
-- **Apply locally; never push.** Never push, open PRs, or file tickets in any mode — push is the outward step the user owns. In **default (interactive)** mode the review applies safe, verified fixes and commits them when the pre-review tree was clean (Stage 5c owns the full rule). In **`mode:agent`** it never mutates the tree — it reports and the caller applies.
+- **Apply locally; never push (the push gate).** Never push, open PRs, or file tickets in any mode — push is the outward step the user owns, and this skill never crosses **the push gate**. In **default (interactive)** mode the review applies safe, verified fixes and commits them when the pre-review tree was clean (Stage 5c owns the full rule). In **`mode:agent`** it never mutates the tree — it reports and the caller applies.
 - **No blocking prompts.** Never use `AskUserQuestion`, `request_user_input`, `ask_user`, or other blocking question tools. Infer intent, plan, and scope from explicit tokens, git state, PR metadata, and conversation. Note uncertainty in Coverage or the verdict — do not stop to ask.
 - **Explicit mutations only.** Never run `gh pr checkout`, `git checkout`, `git switch`, or similar branch-switch commands. Passing a PR number, URL, or branch name selects **review scope**, not permission to mutate the working tree. To review local uncommitted work on a feature branch, check out that branch yourself (or stay on it) and pass `base:` or no target.
 - **Smart defaults.** Untracked files: review tracked changes only and list excluded paths in Coverage. Plan: use `plan:` when passed; otherwise discover conservatively from PR body or branch keywords. Weak advisory P2/P3 from testing/maintainability alone: demote to `testing_gaps` / `residual_risks` per Stage 5.
@@ -78,7 +79,7 @@ Sequence:
 2. **Exemption:** If no built-in review exists, continue into the full multi-agent review.
 3. **`mode:agent` bypasses this short-circuit** — always run the full multi-agent review and return JSON.
 
-**Deprecated:** `mode:autofix` is no longer supported — there is no apply *mode*. If passed, ignore the token and proceed with the normal flow (default applies safe fixes via Stage 5c; `mode:agent` reports and the caller applies).
+There is no apply *mode* — see the deprecated `mode:autofix` handling in Argument Parsing.
 
 ## Severity Scale
 
@@ -656,7 +657,7 @@ If this self-review changes files, rerun the affected tests or lint for those fo
 
 - **Clean before the review:** after applying and verifying, commit the fixes as one isolated, review-labeled fix commit — `fix(review): <summary>`, or the repo's nearest convention if `review` isn't an allowed scope. Labeled and reversible, returning the tree to a known state.
 - **Dirty before the review:** apply but do **not** commit — the fixes interleave with the user's in-flight work and ride along with the commit they were already going to make. The Applied section lists what changed.
-- **Never push, open a PR, or file tickets** — that's the outward-facing step the user owns.
+- **Never cross the push gate** (Operating principles) — commit locally at most; no push, PR, or ticket.
 
 **Surface green-but-unverifiable edits.** When an applied fix touches auth/authz, a public or cross-service contract/schema, or concurrency/ordering, a passing test does not prove safety — flag it prominently in the Applied section so the diff reviewer's attention goes there.
 
@@ -765,7 +766,7 @@ Stack-specific reviewers fire only when the diff touches runtime behavior they s
 
 ## After Review
 
-After Stage 6, stop. Never push, open PRs, or file tickets from this skill. In default (interactive) mode, Stage 5c has already applied and (on a clean pre-review tree) committed the safe fixes; in `mode:agent` the review mutates nothing — the caller (for example, an orchestrating workflow) and the user apply fixes, file tickets, or accept residual risk using the report and artifact.
+After Stage 6, stop — never cross the push gate (Operating principles). In default (interactive) mode, Stage 5c has already applied and (on a clean pre-review tree) committed the safe fixes; in `mode:agent` the review mutates nothing — the caller (for example, an orchestrating workflow) and the user apply fixes, file tickets, or accept residual risk using the report and artifact.
 
 ### Emit actionable findings summary (default mode only)
 
