@@ -93,7 +93,7 @@ define_catalog() {
         "Thermo-nuclear branch review (dev-os marketplace, user scope)" \
         "claude plugin marketplace add $BASE_DIR" \
         "claude plugin marketplace update dev-os && claude plugin update thermos@dev-os" \
-        "claude plugin install thermos@dev-os --scope user"
+        "claude plugin install thermos@dev-os --scope global"
 
     # npx-skills: `add` is idempotent and used for update too (see header note).
 

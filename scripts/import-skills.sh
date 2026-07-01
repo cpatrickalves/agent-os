@@ -26,6 +26,11 @@ OVERWRITE="false"
 SKILLS_SOURCE="$HOME/dev-os/.claude/skills"
 SKILLS_DEST="$PROJECT_DIR/.claude/skills"
 
+# Skills installed globally (user-level) instead of into the project.
+# These are copied to $GLOBAL_SKILLS_DEST so they are available in every project.
+GLOBAL_SKILLS_DEST="$HOME/.claude/skills"
+declare -a GLOBAL_SKILLS=("ce-code-review" "docs-generator")
+
 # Arrays for skill handling
 declare -a SKILL_DIRS
 declare -a SKILL_NAMES
@@ -111,6 +116,32 @@ validate_skills_source() {
     fi
 
     print_verbose "Found $count skill directories in source"
+}
+
+# -----------------------------------------------------------------------------
+# Destination Resolution
+# -----------------------------------------------------------------------------
+
+# Return 0 if the given skill (by source directory name) installs globally.
+is_global_skill() {
+    local skill="$1"
+    local g
+    for g in "${GLOBAL_SKILLS[@]}"; do
+        if [[ "$skill" == "$g" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Echo the destination skills root for the given skill.
+skill_dest_dir() {
+    local skill="$1"
+    if is_global_skill "$skill"; then
+        echo "$GLOBAL_SKILLS_DEST"
+    else
+        echo "$SKILLS_DEST"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -201,7 +232,9 @@ check_existing_skills() {
     local conflicts=()
 
     for skill in "${SELECTED_SKILLS[@]}"; do
-        if [[ -d "$SKILLS_DEST/$skill" ]]; then
+        local dest_dir
+        dest_dir="$(skill_dest_dir "$skill")"
+        if [[ -d "$dest_dir/$skill" ]]; then
             conflicts+=("$skill")
         fi
     done
@@ -275,17 +308,29 @@ check_existing_skills() {
 # -----------------------------------------------------------------------------
 
 execute_import() {
-    mkdir -p "$SKILLS_DEST"
-
-    local import_count=0
+    local local_count=0
+    local global_count=0
     for skill in "${SELECTED_SKILLS[@]}"; do
-        cp -r "$SKILLS_SOURCE/$skill" "$SKILLS_DEST/"
-        import_count=$((import_count + 1))
-        print_verbose "Imported: $skill"
+        local dest_dir
+        dest_dir="$(skill_dest_dir "$skill")"
+        mkdir -p "$dest_dir"
+        cp -r "$SKILLS_SOURCE/$skill" "$dest_dir/"
+        if is_global_skill "$skill"; then
+            global_count=$((global_count + 1))
+            print_verbose "Imported (global): $skill -> $dest_dir/"
+        else
+            local_count=$((local_count + 1))
+            print_verbose "Imported (local): $skill -> $dest_dir/"
+        fi
     done
 
     echo ""
-    print_success "Imported $import_count skill(s) to .claude/skills/"
+    if [[ "$local_count" -gt 0 ]]; then
+        print_success "Imported $local_count skill(s) to $SKILLS_DEST/"
+    fi
+    if [[ "$global_count" -gt 0 ]]; then
+        print_success "Imported $global_count skill(s) globally to $GLOBAL_SKILLS_DEST/"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -307,7 +352,8 @@ main() {
     # Show summary
     echo ""
     print_status "Source: $SKILLS_SOURCE"
-    print_status "Destination: $SKILLS_DEST"
+    print_status "Destination (local): $SKILLS_DEST"
+    print_status "Destination (global): $GLOBAL_SKILLS_DEST (${GLOBAL_SKILLS[*]})"
     echo ""
     print_status "Available skills: ${#SKILL_DIRS[@]}"
     echo ""
