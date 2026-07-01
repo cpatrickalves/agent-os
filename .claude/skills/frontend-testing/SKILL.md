@@ -1,7 +1,8 @@
 ---
 name: frontend-testing
 description: Generates Vitest + React Testing Library tests for frontend components, hooks, and utilities. Use when writing tests, reviewing spec files, improving coverage, or when the user mentions Vitest, RTL, unit tests, or integration tests.
-source: https://github.com/langgenius/dify/blob/main/.agents/skills/frontend-testing # adapted from Dify project
+metadata:
+  source: https://github.com/langgenius/dify/blob/main/.agents/skills/frontend-testing # adapted from Dify project
 ---
 
 # Frontend Testing Skill
