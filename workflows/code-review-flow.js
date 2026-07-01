@@ -29,7 +29,7 @@ const REPORT_SCHEMA = {
 
 const REVIEWERS = [
   { key: 'thermos', skill: 'thermos:thermos' },
-  { key: 'ce-code-review', skill: 'compound-engineering:ce-code-review' },
+  { key: 'ce-code-review', skill: 'ce-code-review' },
 ]
 
 // Barreira proposital: a consolidação precisa dos DOIS relatórios juntos.
