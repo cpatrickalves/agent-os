@@ -75,9 +75,10 @@ planecli cycle items "Sprint 1" -p "Project" --json
 ### Modules, Labels, States, Documents, Comments
 
 ```bash
-# Modules
+# Modules (--status: backlog, planned, in-progress, paused, completed, cancelled)
 planecli module ls -p "Project" --json
-planecli module create "Auth" -p "Project" -d "Login flows" --json
+planecli module create "Auth" -p "Project" -d "Login flows" --status in-progress --json
+planecli module update "Auth" -p "Project" --status completed --json
 
 # Labels
 planecli label ls -p "Project" --json

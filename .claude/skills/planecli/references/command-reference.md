@@ -205,10 +205,13 @@ Command group: `planecli module` (alias: `modules`)
 ```
 planecli module ls -p PROJECT
 planecli module show MODULE -p PROJECT
-planecli module create NAME -p PROJECT [-d DESCRIPTION] [--start-date DATE] [--end-date DATE]
-planecli module update MODULE -p PROJECT [OPTIONS]
+planecli module create NAME -p PROJECT [-d DESCRIPTION] [--start-date DATE] [--end-date DATE] [--status STATUS]
+planecli module update MODULE -p PROJECT [--name NAME] [-d DESCRIPTION] [--start-date DATE] [--end-date DATE] [--status STATUS]
 planecli module delete MODULE -p PROJECT
 ```
+
+**Module status values** (`--status`): `backlog`, `planned`, `in-progress`, `paused`, `completed`, `cancelled`.
+Also accepts Portuguese aliases: `planejado`, `em andamento`, `pausado`, `concluído`, `cancelado` (and `canceled`, `in progress`).
 
 ## Labels
 
