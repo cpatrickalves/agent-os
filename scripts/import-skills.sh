@@ -210,13 +210,21 @@ select_skills() {
     fi
 
     # Interactive keyboard picker (shared, in common-functions.sh).
-    PICKER_NAMES=("${SKILL_NAMES[@]}")
+    # Tag globally-installed skills so the user knows they land in ~/.claude/skills.
+    PICKER_NAMES=()
+    local i
+    for i in "${!SKILL_NAMES[@]}"; do
+        if is_global_skill "${SKILL_DIRS[$i]}"; then
+            PICKER_NAMES+=("${SKILL_NAMES[$i]} (global)")
+        else
+            PICKER_NAMES+=("${SKILL_NAMES[$i]} (local)")
+        fi
+    done
     PICKER_DESCS=("${SKILL_DESCRIPTIONS[@]}")
     PICKER_NOUN="skills"
     select_items
 
     SELECTED_SKILLS=()
-    local i
     for i in "${PICKER_SELECTED[@]}"; do
         SELECTED_SKILLS+=("${SKILL_DIRS[$i]}")
     done
