@@ -2,7 +2,7 @@
 
 # =============================================================================
 # Dev-OS Import Workflows Script
-# Import Claude workflows from Dev-OS to the current project
+# Import Claude workflows from Dev-OS globally (~/.claude/workflows)
 # =============================================================================
 
 set -e
@@ -23,8 +23,10 @@ VERBOSE="false"
 IMPORT_ALL="false"
 OVERWRITE="false"
 
+# Workflows are installed globally (user-level) so they are available in every
+# project, not into the current project's .claude/workflows.
 WORKFLOWS_SOURCE="$HOME/dev-os/workflows"
-WORKFLOWS_DEST="$PROJECT_DIR/.claude/workflows"
+WORKFLOWS_DEST="$HOME/.claude/workflows"
 
 # Arrays for workflow handling
 declare -a WORKFLOW_FILES
@@ -40,7 +42,8 @@ show_help() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Import Claude workflows from Dev-OS to the current project.
+Import Claude workflows from Dev-OS globally (into ~/.claude/workflows),
+making them available in every project.
 
 Options:
     --all              Import all available workflows (skip selection)
@@ -291,7 +294,7 @@ execute_import() {
     done
 
     echo ""
-    print_success "Imported $import_count workflow(s) to .claude/workflows/"
+    print_success "Imported $import_count workflow(s) globally to $WORKFLOWS_DEST/"
 }
 
 # -----------------------------------------------------------------------------
