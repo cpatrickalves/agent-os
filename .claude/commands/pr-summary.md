@@ -3,6 +3,7 @@ description: Generate a summary for the current branch changes
 allowed-tools: Bash(git:*)
 model: haiku
 context: fork
+disable-model-invocation: true
 ---
 
 # PR Summary

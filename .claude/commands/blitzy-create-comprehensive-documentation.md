@@ -1,5 +1,6 @@
 ---
 description: Add comprehensive module-level and code-level documentation across the project
+disable-model-invocation: true
 ---
 
 # Document Code Prompt Template

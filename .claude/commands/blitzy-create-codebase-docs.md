@@ -1,5 +1,6 @@
 ---
 description: Review the codebase and generate a structured codebase-ingestion doc at docs/02-codebase.md
+disable-model-invocation: true
 ---
 
 ## Codebase Ingestion Prompt Template
