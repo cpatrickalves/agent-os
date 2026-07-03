@@ -5,6 +5,7 @@ allowed-tools: Bash(planecli *)
 metadata:
   author: Patrick Alves
   version: "1.0"
+  requirements: https://github.com/cpatrickalves/plane-cli
 ---
 
 # PlaneCLI
@@ -39,6 +40,11 @@ planecli wi ls -p "Project" --labels "bug,critical" --sort updated --json
 # Create
 planecli wi create "Title" -p "Project" --assign me --priority urgent --state "Todo" --json
 planecli wi create "Sub-task" --parent ABC-123 --assign "Patrick" --labels "backend" --json
+
+# Create with description (-d / --description). Accepts markdown (headers, code fences,
+# lists) — Plane renders it. For long/multiline bodies, write to a file and pipe it in:
+planecli wi create "Title" -p "Project" -d "Short description" --json
+planecli wi create "Title" -p "Project" -d "$(cat /tmp/body.md)" --json   # long/rich body
 
 # Update
 planecli wi update ABC-123 --state "Done" --priority none --json
@@ -117,6 +123,11 @@ planecli comment create ABC-123 --body "Fixed in PR #456" --json
 ## Priority Values
 
 `urgent` (1), `high` (2), `medium` (3), `low` (4), `none` (0). Accept names or numbers.
+
+## Gotchas
+
+- **Descriptions accept markdown.** The `-d` / `--description` flag (on `wi create` and `wi update`) is documented as "plain text", but Plane renders markdown — headers, `code fences`, lists, tables. For long or multiline bodies with code, write the content to a file and pass it with command substitution: `-d "$(cat body.md)"`. Building a huge inline string is error-prone; a file is more reliable. After a bulk create, verify one item with `wi show <ID> --json` to confirm the body rendered before creating the rest.
+- **`sequence_id` shape differs between commands.** `wi show`/`wi create` return it as an integer (`204`); `wi ls` returns it already prefixed as a string (`"PIPERAG-204"`). Don't re-prefix the list value (you'd get `PIPERAG-PIPERAG-204`). To build an identifier, use `sequence_id` directly from `wi ls`, or `"{project_identifier}-{sequence_id}"` from `wi show`.
 
 ## Common Patterns
 
