@@ -26,6 +26,11 @@ OVERWRITE="false"
 AGENTS_SOURCE="$HOME/dev-os/.claude/agents"
 AGENTS_DEST="$PROJECT_DIR/.claude/agents"
 
+# Agents installed globally (user-level) instead of into the project.
+# These are copied to $GLOBAL_AGENTS_DEST so they are available in every project.
+GLOBAL_AGENTS_DEST="$HOME/.claude/agents"
+declare -a GLOBAL_AGENTS=("framework-docs-researcher")
+
 # Arrays for agent handling
 declare -a AGENT_FILES
 declare -a AGENT_NAMES
@@ -114,6 +119,32 @@ validate_agents_source() {
 }
 
 # -----------------------------------------------------------------------------
+# Destination Resolution
+# -----------------------------------------------------------------------------
+
+# Return 0 if the given agent (by source filename) installs globally.
+is_global_agent() {
+    local agent="${1%.md}"
+    local g
+    for g in "${GLOBAL_AGENTS[@]}"; do
+        if [[ "$agent" == "$g" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Echo the destination agents root for the given agent.
+agent_dest_dir() {
+    local agent="$1"
+    if is_global_agent "$agent"; then
+        echo "$GLOBAL_AGENTS_DEST"
+    else
+        echo "$AGENTS_DEST"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Agent Discovery
 # -----------------------------------------------------------------------------
 
@@ -182,7 +213,16 @@ select_agents() {
     fi
 
     # Interactive keyboard picker (shared, in common-functions.sh).
-    PICKER_NAMES=("${AGENT_NAMES[@]}")
+    # Tag globally-installed agents so the user knows they land in ~/.claude/agents.
+    PICKER_NAMES=()
+    local i
+    for i in "${!AGENT_NAMES[@]}"; do
+        if is_global_agent "${AGENT_FILES[$i]}"; then
+            PICKER_NAMES+=("${AGENT_NAMES[$i]} (global)")
+        else
+            PICKER_NAMES+=("${AGENT_NAMES[$i]} (local)")
+        fi
+    done
     PICKER_DESCS=("${AGENT_DESCRIPTIONS[@]}")
     PICKER_NOUN="agents"
     select_items
@@ -204,7 +244,9 @@ check_existing_agents() {
     local conflicts=()
 
     for agent in "${SELECTED_AGENTS[@]}"; do
-        if [[ -f "$AGENTS_DEST/$agent" ]]; then
+        local dest_dir
+        dest_dir="$(agent_dest_dir "$agent")"
+        if [[ -f "$dest_dir/$agent" ]]; then
             conflicts+=("$agent")
         fi
     done
@@ -278,17 +320,29 @@ check_existing_agents() {
 # -----------------------------------------------------------------------------
 
 execute_import() {
-    mkdir -p "$AGENTS_DEST"
-
-    local import_count=0
+    local local_count=0
+    local global_count=0
     for agent in "${SELECTED_AGENTS[@]}"; do
-        cp "$AGENTS_SOURCE/$agent" "$AGENTS_DEST/"
-        import_count=$((import_count + 1))
-        print_verbose "Imported: ${agent%.md}"
+        local dest_dir
+        dest_dir="$(agent_dest_dir "$agent")"
+        mkdir -p "$dest_dir"
+        cp "$AGENTS_SOURCE/$agent" "$dest_dir/"
+        if is_global_agent "$agent"; then
+            global_count=$((global_count + 1))
+            print_verbose "Imported (global): ${agent%.md} -> $dest_dir/"
+        else
+            local_count=$((local_count + 1))
+            print_verbose "Imported (local): ${agent%.md} -> $dest_dir/"
+        fi
     done
 
     echo ""
-    print_success "Imported $import_count agent(s) to .claude/agents/"
+    if [[ "$local_count" -gt 0 ]]; then
+        print_success "Imported $local_count agent(s) to $AGENTS_DEST/"
+    fi
+    if [[ "$global_count" -gt 0 ]]; then
+        print_success "Imported $global_count agent(s) globally to $GLOBAL_AGENTS_DEST/"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -310,7 +364,8 @@ main() {
     # Show summary
     echo ""
     print_status "Source: $AGENTS_SOURCE"
-    print_status "Destination: $AGENTS_DEST"
+    print_status "Destination (local): $AGENTS_DEST"
+    print_status "Destination (global): $GLOBAL_AGENTS_DEST (${GLOBAL_AGENTS[*]})"
     echo ""
     print_status "Available agents: ${#AGENT_FILES[@]}"
     echo ""

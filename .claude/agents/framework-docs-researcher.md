@@ -1,8 +1,10 @@
 ---
-name: ce-framework-docs-researcher
+name: framework-docs-researcher
 description: "Gathers comprehensive documentation and best practices for frameworks, libraries, or dependencies. Use when you need official docs, version-specific constraints, or implementation patterns."
 model: inherit
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, mcp__context7__*
+metadata:
+  - referente: https://github.com/EveryInc/compound-engineering-plugin/blob/main/skills/ce-plan/references/agents/framework-docs-researcher.md
 ---
 
 **Note: The current year is 2026.** Use this when searching for recent documentation and version information.
