@@ -1,19 +1,12 @@
 ---
 name: ai-agent-security-analysis
 description: >
-  Analyze the security posture of AI agents: inventory agents in a codebase, classify
-  autonomy, map data access / tools / privileged actions, detect toxic combinations
-  (e.g., sensitive-data read + external send = exfiltration path), audit MCP governance,
-  assess runtime guardrails, and produce a prioritized security report with an optional
-  red-team test plan. Use this skill whenever the user asks to review, audit, harden, or
-  assess an AI agent or agentic system — mentions "agent security", "segurança de agentes",
-  "análise de segurança", "auditoria do agente", "prompt injection", "MCP security",
-  "red teaming de agentes", "combinações tóxicas", or asks "what can this agent do if
-  manipulated?". Also use when reviewing .mcp.json / MCP server configs, agent tool
-  definitions, agent permissions, or multi-agent architectures — even if the user doesn't
-  say "security" but wants an agent's tools, permissions, or risks reviewed before
-  shipping. Works on real code (any framework: LangChain/LangGraph, CrewAI, OpenAI
-  Agents SDK, Claude Agent SDK, MCP configs) and on architecture descriptions in prose.
+  Audit the security posture of an AI agent (codebase or architecture description):
+  find toxic combinations, review MCP governance and guardrails, produce a prioritized
+  report with an optional red-team plan.
+disable-model-invocation: true
+metadata:
+  source: https://webinar.gartner.com/859726/agenda/session/1868315?login=ML
 ---
 
 # AI Agent Security Analysis
@@ -113,11 +106,9 @@ manipulated (data exfiltrated? emails sent as the user? production data destroye
 Run four assessment lenses. Each has a dedicated reference — read it when you reach
 that lens:
 
-**a. Toxic combinations** — read `references/toxic-combinations.md`. Risk lives in
-*combinations*, not isolated permissions: CRM read + email send = exfiltration path;
-internal data + web fetch = exfiltration path; read-only intent + write permission =
-excess privilege. Map every (data access × action) pair the agent holds and check it
-against the catalog.
+**a. Toxic combinations** — read `references/toxic-combinations.md`. Map every
+(data access × action) pair the agent holds and check it against the catalog; no pair
+unexamined.
 
 **b. Intent vs. permission alignment** — compare four intents and flag misalignment:
 
@@ -132,10 +123,8 @@ calendar **write**. Permissions the stated purpose doesn't need are findings, al
 recommend: intent-based access — only the permission needed, only when needed, only for
 the current intent.
 
-**c. MCP governance** — read `references/mcp-security.md`. MCP is the agent's power link
-to tools, APIs, and data — a capability accelerator and a risk accelerator. Check:
-allowlist (not denylist), official/verified servers, HTTPS, version pinning, scanning,
-gateway, and — critically — whether **MCP responses are treated as untrusted input**.
+**c. MCP governance** — read `references/mcp-security.md` and review every MCP server
+the agent uses against its checklist.
 
 **d. Guardrails & runtime defense** — build-time review is necessary but insufficient,
 because agents *change during use* (memory, skills, MCPs, the APIs behind MCPs, tools,
@@ -165,43 +154,16 @@ Severity is defined by **path completeness**, not by individual scary permission
 |----------|----------|
 | **Critical** | Complete attack path: untrusted content reaches the LLM **and** the agent holds the data access **and** the outbound/privileged action to complete exfiltration or destruction — with no intercepting control. |
 | **High** | Complete path with partial mitigation (e.g., guardrail on prompt only), **or** a destructive privileged action reachable from untrusted input even without sensitive data. |
-| **Medium** | Excess privilege vs. intent; missing MCP governance controls; guardrails covering only the user prompt; one-time (non-continuous) posture review. |
+| **Medium** | Excess privilege vs. intent; missing MCP governance controls; guardrails covering only the user prompt; one-time (non-continuous) posture review; testing that covers responses but never actions. |
 | **Low** | Hygiene gaps: no agent inventory/registry, missing logging/telemetry, no documented risk acceptance. |
 
-Every finding needs: the combination or gap, evidence (file:line or the user's own
-description), a concrete failure scenario ("attacker emails X → agent summarizing inbox
-reads it → ..."), and a specific fix. Prefer fixes that *remove* the path (drop the write
-permission, split the agent) over fixes that *filter* the path (add a guardrail) —
-guardrails are useful but imperfect; there will always be a new jailbreak.
+Prefer fixes that *remove* the path (drop the write permission, split the agent) over
+fixes that *filter* the path (add a guardrail) — guardrails are useful but imperfect;
+there will always be a new jailbreak.
 
 ### Phase 5 — Red-team test plan (on request, or for Critical/High findings)
 
-Read `references/red-teaming.md`. Agent red teaming is not chatbot red teaming: the goal
-is not to make the model say something bad, but to **manipulate the tools, data,
-permissions, and MCP calls behind the agent**. Generate concrete test cases — direct
-injection, indirect injection through each ingestion channel the agent actually has, and
-exfiltration tests derived from the toxic combinations you found in Phase 3.
+Read `references/red-teaming.md` and generate test cases grounded in the ingestion
+channels and toxic combinations found in Phase 3 — every Critical/High path gets at
+least one test.
 
-## Common mistakes to check for (fast heuristic list)
-
-Each of these, if present, is a finding:
-
-- Treating the agent like a chatbot (only response-quality testing, no action testing).
-- Guardrails on the user prompt only — nothing on emails, docs, memory, MCP responses.
-- No inventory of agents (shadow agents in the codebase).
-- Deny list as the primary MCP control (allowlist is the recommendation — e.g., 300+
-  GitHub MCP servers existed, one official).
-- Permissions reviewed in isolation, never as combinations.
-- Posture reviewed once before go-live, never again — while memory, skills, and MCPs
-  keep changing.
-- Indirect prompt injection not considered (only direct).
-- Believing red teaming eliminates risk (it samples it).
-
-## References
-
-| File | When to read |
-|------|--------------|
-| `references/toxic-combinations.md` | Phase 3a — catalog of dangerous data×action pairs with detection heuristics |
-| `references/mcp-security.md` | Phase 3c — MCP governance checklist and config review guide |
-| `references/report-template.md` | Phase 4 — exact report structure and a worked finding example |
-| `references/red-teaming.md` | Phase 5 — how to generate an agent red-team test plan |
