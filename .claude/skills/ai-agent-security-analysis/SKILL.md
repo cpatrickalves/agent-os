@@ -1,12 +1,14 @@
 ---
 name: ai-agent-security-analysis
 description: >
-  Audit the security posture of an AI agent (codebase or architecture description):
-  find toxic combinations, review MCP governance and guardrails, produce a prioritized
-  report with an optional red-team plan.
+  Audits the security posture of an AI agent (codebase or architecture description):
+  finds toxic combinations, reviews MCP governance and guardrails, and produces a
+  prioritized report with an optional red-team plan. Use when reviewing agent security,
+  auditing MCP configs, or assessing prompt-injection and exfiltration risk.
 disable-model-invocation: true
 metadata:
-  source: https://webinar.gartner.com/859726/agenda/session/1868315?login=ML
+  source: https://webinar.gartner.com/859726/agenda/session/1868315 (Gartner webinar, login required)
+  author: Patrick Alves
 ---
 
 # AI Agent Security Analysis
@@ -50,6 +52,17 @@ Write the report in the language the user is speaking (PT-BR user → PT-BR repo
 
 ## Workflow
 
+Copy this checklist and keep it updated as you work:
+
+```
+Analysis Progress:
+- [ ] Phase 1: Discovery — agent inventory complete
+- [ ] Phase 2: Autonomy + blast radius classified
+- [ ] Phase 3: Assess — toxic combos, intent alignment, MCP, guardrails
+- [ ] Phase 4: Report produced (report-template.md structure)
+- [ ] Phase 5: Red-team plan (if requested or any Critical/High)
+```
+
 ### Phase 1 — Discovery: you can't secure what you can't see
 
 Inventory every agent in scope. Organizations (and repos) routinely contain more agents
@@ -69,6 +82,9 @@ than anyone declared. Search for these signals:
 4. Tool/skill definitions:
    - @tool decorators, tools=[...] arrays, function-calling schemas, OpenAPI specs
      wired to the model, .claude/skills/, .claude/commands/
+   - .claude/agents/ (subagent definitions — a multi-agent signal)
+   - hooks: .claude/hooks/, settings.json hooks (code that runs with the agent's
+     permissions on every matching event)
 5. Agent instructions and memory:
    - system prompts, instruction files (CLAUDE.md, AGENTS.md, prompt templates),
      memory stores (vector DBs, files the agent writes and later re-reads)

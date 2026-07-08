@@ -97,4 +97,3 @@ couldn't inspect.>
   - If both must stay: allowlist recipients to internal domains, and require human
     approval for any send in a session where Salesforce was read. Add MCP/tool-response
     and email-body guardrails, not just prompt guardrails.
-```
