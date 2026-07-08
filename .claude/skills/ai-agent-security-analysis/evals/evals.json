@@ -1,0 +1,23 @@
+{
+  "skill_name": "ai-agent-security-analysis",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Antes de subir pra produção, dá uma olhada na segurança desse nosso agente de suporte. Ele tá em agents/triage.py, usa LangChain, lê tickets do Salesforce e consegue mandar e-mail pros clientes. Roda num container na AWS. Quero saber o que pode dar errado.",
+      "expected_output": "Should discover the agent from the code, inventory its data access (Salesforce read) and actions (email send), classify autonomy, and flag the toxic combination (CRM read + email send = exfiltration path) as Critical with a concrete indirect-injection scenario. Should check whether guardrails cover only the prompt. Should produce a report following report-template.md in PT-BR, citing file:line, and prefer removing the path (split agents / drop scope) over just adding a guardrail.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm designing a personal assistant agent. Idea: it reads my Gmail and Google Calendar, can reschedule meetings, and can browse the web to look things up. It'll run on Claude with a few MCP servers. Is this design safe? What should I worry about?",
+      "expected_output": "Architecture mode (no code). Should build the inventory from the description, ask about / flag ambiguous risk points, and identify toxic combinations: internal data (email) + web fetch (exfiltration path), and calendar/email write permissions vs. intent. Should cover indirect prompt injection through email content, MCP response trust, and recommend intent-based least privilege. Report in English following the template, with assumptions marked.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Auditoria de MCP: aqui tá o .mcp.json do projeto. Tem uns 6 servidores MCP configurados, alguns puxados do npm com @latest, e um deles é um github-mcp que não sei se é oficial. Me diz o que tá inseguro nessa config.",
+      "expected_output": "Should focus on MCP governance (mcp-security.md): flag unofficial/lookalike GitHub server, unpinned @latest versions, http vs https, inline tokens, denylist vs allowlist, and the untrusted-MCP-response principle. Should cite specific entries in the config and rate findings (mostly Medium unless a server completes an attack path). Report in PT-BR.",
+      "files": []
+    }
+  ]
+}
