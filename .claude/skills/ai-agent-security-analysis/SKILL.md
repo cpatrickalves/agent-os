@@ -1,19 +1,21 @@
 ---
 name: ai-agent-security-analysis
 description: >
-  Analyze the security posture of AI agents: inventory agents in a codebase, classify
-  autonomy, map data access / tools / privileged actions, detect toxic combinations
-  (e.g., sensitive-data read + external send = exfiltration path), audit MCP governance,
-  assess runtime guardrails, and produce a prioritized security report with an optional
-  red-team test plan. Use this skill whenever the user asks to review, audit, harden, or
-  assess an AI agent or agentic system — mentions "agent security", "segurança de agentes",
-  "análise de segurança", "auditoria do agente", "prompt injection", "MCP security",
-  "red teaming de agentes", "combinações tóxicas", or asks "what can this agent do if
-  manipulated?". Also use when reviewing .mcp.json / MCP server configs, agent tool
-  definitions, agent permissions, or multi-agent architectures — even if the user doesn't
-  say "security" but wants an agent's tools, permissions, or risks reviewed before
-  shipping. Works on real code (any framework: LangChain/LangGraph, CrewAI, OpenAI
-  Agents SDK, Claude Agent SDK, MCP configs) and on architecture descriptions in prose.
+  Analyzes the security posture of AI agents: inventories agents in a codebase, classifies
+  autonomy, maps data access / tools / privileged actions, detects toxic combinations
+  (e.g., sensitive-data read + external send = exfiltration path), audits MCP governance,
+  assesses runtime guardrails, and produces a prioritized security report with an optional
+  red-team test plan. Use when the user asks to review, audit, harden, or assess an AI
+  agent or agentic system — mentions "agent security", "segurança de agentes", "auditoria
+  do agente", "prompt injection", "MCP security", "red teaming de agentes", "combinações
+  tóxicas", or asks "what can this agent do if manipulated?". Also use when reviewing
+  .mcp.json / MCP server configs, agent tool definitions, agent permissions, or
+  multi-agent architectures — even if the user doesn't say "security". Works on real code
+  (LangChain/LangGraph, CrewAI, OpenAI Agents SDK, Claude Agent SDK, MCP configs) and on
+  architecture descriptions in prose.
+disable-model-invocation: true
+metadata:
+  source: https://webinar.gartner.com/859726/agenda/session/1868315?login=ML
 ---
 
 # AI Agent Security Analysis
@@ -56,6 +58,17 @@ paths by severity.
 Write the report in the language the user is speaking (PT-BR user → PT-BR report).
 
 ## Workflow
+
+Copy this checklist and keep it updated as the analysis progresses:
+
+```
+Analysis Progress:
+- [ ] Phase 1 — Discovery: inventory every agent (entry points, data, tools, credentials, instructions/memory)
+- [ ] Phase 2 — Classify autonomy (low / high / multi-agent) and blast radius per agent
+- [ ] Phase 3 — Assess: toxic combinations, intent vs. permission, MCP governance, runtime guardrails
+- [ ] Phase 4 — Report: findings with evidence and severity, per report-template.md
+- [ ] Phase 5 — Red-team test plan (on request, or when Critical/High findings exist)
+```
 
 ### Phase 1 — Discovery: you can't secure what you can't see
 
