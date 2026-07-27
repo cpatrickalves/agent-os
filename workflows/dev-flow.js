@@ -1,10 +1,10 @@
 export const meta = {
   name: 'dev-flow',
-  description: 'Fluxo de desenvolvimento: implementação do plano → code review duplo → correções no PR',
+  description: 'Fluxo de desenvolvimento: implementação do plano → code review triplo → correções no PR',
   whenToUse: 'Quando existir um plano de implementação em markdown pronto para executar de ponta a ponta. Uso: Workflow({name: "dev-flow", args: "/path/do/plano.md"})',
   phases: [
     { title: 'Development', detail: 'implementa o plano, commita e abre PR para a branch dev', model: 'sonnet' },
-    { title: 'Code Review', detail: '2 revisores em paralelo (thermos + ce-code-review, ambos Opus) e consolidação dos relatórios' },
+    { title: 'Code Review', detail: '3 revisores em paralelo (thermos + ce-code-review + matt-code-review, todos Opus) e consolidação dos relatórios' },
     { title: 'PR Fixes', detail: 'julga cada achado, aplica as correções procedentes e atualiza o PR', model: 'sonnet' },
     { title: 'Docs Audit', detail: 'auditoria de documentação da branch com a skill docs-generator (sincronia /docs + ADRs/guides)', model: 'opus' },
   ],
@@ -53,18 +53,25 @@ const REPORT_SCHEMA = {
   required: ['report_path'],
 }
 
+// Sufixo dos relatórios: número do PR — Azure DevOps (.../pullrequest/1234),
+// GitHub (.../pull/1234) ou o número solto. Fallback: última sequência de dígitos.
+const prId =
+  String(dev.pr_url).match(/\/(?:pullrequest|pull)\/(\d+)/i)?.[1] ?? String(dev.pr_url).match(/\d+/g)?.pop() ?? 'pr'
+
 const REVIEWERS = [
   { key: 'thermos', skill: 'thermos:thermos' },
   { key: 'ce-code-review', skill: 'ce-code-review' },
+  { key: 'matt-code-review', skill: 'code-review' },
 ]
 
-// Barreira proposital: a consolidação precisa dos DOIS relatórios juntos.
+// Barreira proposital: a consolidação precisa dos TRÊS relatórios juntos.
 const reviews = (
   await parallel(
     REVIEWERS.map((r) => () =>
       agent(
         `Invoque a skill "${r.skill}" (via Skill tool) com a seguinte tarefa: ` +
-          `revise o PR ${dev.pr_url} e gere um relatório em /tmp detalhando os achados e possíveis correções. ` +
+          `revise o PR ${dev.pr_url} e gere um relatório detalhando os achados e possíveis correções ` +
+          `em "/tmp/relatorio-${r.key}-${prId}.md". ` +
           'Como resultado, retorne o path do relatório gerado.',
         { label: `review:${r.key}`, phase: 'Code Review', model: 'opus', schema: REPORT_SCHEMA },
       ),
@@ -91,7 +98,7 @@ log(`Relatório consolidado: ${consolidated.report_path}`)
 phase('PR Fixes')
 
 const fixes = await agent(
-  `Utilizei 2 agentes externos para fazer a revisão da implementação e PR ${dev.pr_url}. ` +
+  `Utilizei 3 agentes externos para fazer a revisão da implementação e PR ${dev.pr_url}. ` +
     `O resultado da revisão está em ${consolidated.report_path}. ` +
     'Use a skill superpowers:brainstorming e analise cada item da revisão, veja o que faz sentido corrigir ' +
     'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +

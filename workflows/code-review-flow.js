@@ -1,10 +1,10 @@
 export const meta = {
   name: 'code-review-flow',
-  description: 'Code review duplo (thermos + ce-code-review, ambos Opus) de um PR e consolidação dos relatórios',
+  description: 'Code review triplo (thermos + ce-code-review + matt-code-review, todos Opus) de um PR e consolidação dos relatórios',
   whenToUse:
     'Quando quiser revisar um PR existente sem implementar nada. Uso: Workflow({name: "code-review-flow", args: "<PR url ou número>"})',
   phases: [
-    { title: 'Code Review', detail: '2 revisores em paralelo (thermos + ce-code-review, ambos Opus) e consolidação dos relatórios' },
+    { title: 'Code Review', detail: '3 revisores em paralelo (thermos + ce-code-review + matt-code-review, todos Opus) e consolidação dos relatórios' },
     { title: 'Final Review', detail: 'julga os achados com grill-with-docs e gera o relatório final em markdown + HTML (html-it) na raiz do projeto', model: 'opus' },
   ],
 }
@@ -27,18 +27,24 @@ const REPORT_SCHEMA = {
   required: ['report_path'],
 }
 
+// Sufixo dos relatórios: número do PR — Azure DevOps (.../pullrequest/1234),
+// GitHub (.../pull/1234) ou o número solto. Fallback: última sequência de dígitos.
+const prId = String(prRef).match(/\/(?:pullrequest|pull)\/(\d+)/i)?.[1] ?? String(prRef).match(/\d+/g)?.pop() ?? 'pr'
+
 const REVIEWERS = [
   { key: 'thermos', skill: 'thermos:thermos' },
   { key: 'ce-code-review', skill: 'ce-code-review' },
+  { key: 'matt-code-review', skill: 'code-review' },
 ]
 
-// Barreira proposital: a consolidação precisa dos DOIS relatórios juntos.
+// Barreira proposital: a consolidação precisa dos TRÊS relatórios juntos.
 const reviews = (
   await parallel(
     REVIEWERS.map((r) => () =>
       agent(
         `Invoque a skill "${r.skill}" (via Skill tool) com a seguinte tarefa: ` +
-          `revise o PR ${prRef} e gere um relatório em /tmp detalhando os achados e possíveis correções. ` +
+          `revise o PR ${prRef} e gere um relatório detalhando os achados e possíveis correções ` +
+          `em "/tmp/relatorio-${r.key}-${prId}.md". ` +
           'Como resultado, retorne o path do relatório gerado.',
         { label: `review:${r.key}`, phase: 'Code Review', model: 'opus', schema: REPORT_SCHEMA },
       ),
@@ -65,7 +71,7 @@ log(`Relatório consolidado: ${consolidated.report_path}`)
 phase('Final Review')
 
 const finalReview = await agent(
-  `Utilizei 2 agentes externos para fazer a revisão da implementação e PR ${prRef}. ` +
+  `Utilizei 3 agentes externos para fazer a revisão da implementação e PR ${prRef}. ` +
     `O resultado da revisão está em ${consolidated.report_path}. ` +
     'Use a skill /grill-with-docs e analise cada item da revisão, veja o que faz sentido corrigir ' +
     'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +
