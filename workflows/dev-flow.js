@@ -84,6 +84,9 @@ const reviews = (
         `Invoque a skill "${r.skill}" (via Skill tool) com a seguinte tarefa: ` +
           `revise o PR ${dev.pr_url} e gere um relatório detalhando os achados e possíveis correções ` +
           `em "/tmp/relatorio-${r.key}-${prId}.md". ` +
+          `Além da revisão de qualidade, verifique se o código implementa fielmente o plano de ` +
+          `implementação ou spec em ${planPath}: registre no relatório, como achados, itens do plano não ` +
+          'implementados, implementados parcialmente ou que divergiram do especificado. ' +
           'Como resultado, retorne o path do relatório gerado.',
         { label: `review:${r.key}`, phase: 'Code Review', model: 'opus', schema: REPORT_SCHEMA },
       ),
