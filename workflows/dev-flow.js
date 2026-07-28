@@ -22,9 +22,9 @@ log(`Implementando o plano: ${planPath}`)
 
 const dev = await agent(
   `Execute a implementação usando as skills e plano detalhados no arquivo: ${planPath}. ` +
-    'Use a abordagem Subagent-Driven com a skill subagent-driven-development seguindo as skills `karpathy-guidelines` e `tdd`' +
-    'Faça todos os commits referenciando a Issue e ao final crie um PR para a branch "dev". ' +
-    'Como resultado, retorne o link do Pull Request criado.',
+    'Use a abordagem Subagent-Driven com a skill subagent-driven-development seguindo as skills `karpathy-guidelines` e `tdd`. ' +
+    'Siga as convenções de commit do repositório (referencie issue apenas se o plano indicar uma) e ao final crie um PR para a branch "dev". ' +
+    'Como resultado, retorne o link do Pull Request criado e a branch de origem dele.',
   {
     label: 'development',
     phase: 'Development',
@@ -33,14 +33,26 @@ const dev = await agent(
       type: 'object',
       properties: {
         pr_url: { type: 'string', description: 'URL do Pull Request criado' },
+        branch: { type: 'string', description: 'Branch de origem do PR' },
         summary: { type: 'string', description: 'Resumo curto do que foi implementado' },
       },
-      required: ['pr_url'],
+      required: ['pr_url', 'branch'],
     },
   },
 )
 if (!dev?.pr_url) throw new Error('A etapa Development não retornou o link do PR.')
 log(`PR criado: ${dev.pr_url}`)
+
+// Cadeia de autorização explícita: cada subagente é avaliado pelo prompt que recebe, isolado —
+// sem esta ligação PR ↔ pedido original do usuário, o push autônomo das etapas seguintes é
+// classificado como escrita externa não autorizada e o subagente é bloqueado.
+const contextoAutorizado = (etapa) =>
+  `Você executa a etapa "${etapa}" do workflow dev-flow, que o usuário pediu para rodar de ` +
+  `ponta a ponta sobre o plano de implementação em ${planPath}. O PR ${dev.pr_url} ` +
+  `(branch de origem: ${dev.branch}) foi criado pela etapa Development deste mesmo workflow, a ` +
+  `partir desse plano — commits e push NESSA branch fazem parte do escopo já autorizado. ` +
+  `Fora de escopo (não faça): merge do PR, push para qualquer outra branch, criar novos PRs, ` +
+  `alterar outros repositórios. `
 
 // ── Etapa 2: Code Review ────────────────────────────────────────────────────
 phase('Code Review')
@@ -98,12 +110,13 @@ log(`Relatório consolidado: ${consolidated.report_path}`)
 phase('PR Fixes')
 
 const fixes = await agent(
-  `Utilizei 3 agentes externos para fazer a revisão da implementação e PR ${dev.pr_url}. ` +
-    `O resultado da revisão está em ${consolidated.report_path}. ` +
-    'Use a skill superpowers:brainstorming e analise cada item da revisão, veja o que faz sentido corrigir ' +
-    'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +
-    'Após julgar o que deve ser corrigido, planeje e aplique as alterações (usando subagents), faça os commits, push para o PR ' +
-    'e atualize o PR adicionando comentários somente dos fixes aplicados e suas justificativas (nao precisa mencionar os rejeitados.',
+  contextoAutorizado('PR Fixes') +
+    `Três revisores independentes produziram o relatório consolidado em ${consolidated.report_path}. ` +
+    'Julgue cada achado: procedente, ou improcedente (falso positivo, premissa incorreta, ' +
+    'overengineering, fora do escopo do plano). Aplique as correções procedentes (pode usar ' +
+    'subagents, um foco por subagent), rode os validadores do repositório, commite e faça push ' +
+    `para a branch ${dev.branch}, e comente no PR listando somente os fixes aplicados e suas ` +
+    'justificativas (não precisa mencionar os rejeitados).',
   {
     label: 'pr-fixes',
     phase: 'PR Fixes',
@@ -119,13 +132,14 @@ const fixes = await agent(
     },
   },
 )
+if (!fixes) log('⚠️ Etapa PR Fixes não concluiu (bloqueio ou erro) — os achados do relatório consolidado precisam de julgamento manual.')
 
 // ── Etapa 4: Docs Audit ─────────────────────────────────────────────────────
 phase('Docs Audit')
 
 const docsAudit = await agent(
-  `Use a skill /docs-generator (via Skill tool) sobre o PR ${dev.pr_url}. ` +
-    `O plano de implementação que originou esta branch está em: ${planPath}. ` +
+  contextoAutorizado('Docs Audit') +
+    'Invoque a skill docs-generator (via Skill tool) e realize a auditoria de documentação desta branch. ' +
     `Contexto: as etapas anteriores de code review e correção já rodaram. Resumo dos fixes aplicados no PR: ${fixes?.summary ?? 'n/d'}. ` +
     `Fixes aplicados: ${fixes?.applied?.length ? fixes.applied.join('; ') : 'nenhum registrado'}. ` +
     'Realize uma auditoria minuciosa nas alterações desta branch seguindo estas diretrizes:\n' +
@@ -142,7 +156,8 @@ const docsAudit = await agent(
     '- Também não faça referências a Issues do Linear ou Plane no Código (ex: "feito de acordo com DEV-88", "EVABOT-XX"), ' +
     'pois não serão acessíveis após a entrega do software. Somente docs versionadas (ADRs, guides, etc.) devem ser referenciadas.\n' +
     '\n' +
-    'Ao final, commite e faça push das atualizações de documentação para o PR.',
+    `Ao final, commite e faça push das atualizações de documentação para a branch ${dev.branch}. ` +
+    'Se um achado exigir mudança fora dessa branch, registre-o no resumo em vez de aplicar.',
   {
     label: 'docs-audit',
     phase: 'Docs Audit',
@@ -158,6 +173,7 @@ const docsAudit = await agent(
     },
   },
 )
+if (!docsAudit) log('⚠️ Etapa Docs Audit não concluiu (bloqueio ou erro) — rodar docs-generator manualmente sobre a branch.')
 
 return {
   pr_url: dev.pr_url,

@@ -71,14 +71,16 @@ log(`Relatório consolidado: ${consolidated.report_path}`)
 phase('Final Review')
 
 const finalReview = await agent(
-  `Utilizei 3 agentes externos para fazer a revisão da implementação e PR ${prRef}. ` +
-    `O resultado da revisão está em ${consolidated.report_path}. ` +
-    'Use a skill /grill-with-docs e analise cada item da revisão, veja o que faz sentido corrigir ' +
-    'e o que não faz sentido (e.g. overengineering, premissa incorreta, falsos positivos, etc.). ' +
-    'Após julgar o que deve ser corrigido, gere um arquivo markdown final da revisão do PR na raiz do projeto "pr-review-xxxx.md". ' +
+  `Você executa a etapa "Final Review" do workflow code-review-flow, que o usuário pediu para ` +
+    `rodar sobre o PR ${prRef}. Três revisores independentes produziram o relatório consolidado ` +
+    `em ${consolidated.report_path}. ` +
+    'Use a skill /grill-with-docs e julgue cada achado: procedente, ou improcedente ' +
+    '(falso positivo, premissa incorreta, overengineering, etc.). ' +
+    `Após o julgamento, gere o relatório final em markdown na raiz do projeto, com o nome "pr-review-${prId}.md". ` +
     'IMPORTANTE: o documento final deve conter APENAS os itens que devem ser corrigidos (os achados procedentes); ' +
     'não inclua os achados descartados/rejeitados (overengineering, premissas incorretas, falsos positivos, etc.). ' +
-    'Em seguida use a skill /html-it para gerar uma versão HTML do "pr-review-xxxx.md" (para melhor legilibidade) também na raiz do projeto. ' +
+    `Em seguida use a skill /html-it para gerar uma versão HTML do "pr-review-${prId}.md" (para melhor legibilidade) também na raiz do projeto. ` +
+    'Este workflow não altera o PR: nenhum commit, push ou comentário — apenas os dois arquivos de relatório. ' +
     'ultrathink.',
   {
     label: 'final-review',
@@ -95,8 +97,12 @@ const finalReview = await agent(
     },
   },
 )
-if (!finalReview?.markdown_path) throw new Error('A etapa Final Review não retornou o path do relatório final.')
-log(`Relatório final: ${finalReview.markdown_path}${finalReview.html_path ? ` | HTML: ${finalReview.html_path}` : ''}`)
+// Sem throw: se a Final Review falhar, os relatórios já produzidos continuam no resultado.
+if (!finalReview?.markdown_path) {
+  log('⚠️ Etapa Final Review não concluiu (bloqueio ou erro) — julgar o relatório consolidado manualmente.')
+} else {
+  log(`Relatório final: ${finalReview.markdown_path}${finalReview.html_path ? ` | HTML: ${finalReview.html_path}` : ''}`)
+}
 
 return {
   pr: prRef,
