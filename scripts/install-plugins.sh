@@ -110,10 +110,10 @@ define_catalog() {
         "claude plugin install andrej-karpathy-skills@karpathy-skills"
 
     add_plugin "mattpocock-skills" \
-        "Matt Pocock skills (npx skills, global)" \
+        "Matt Pocock skills (official, user scope)" \
         "" \
-        "npx skills@latest add mattpocock/skills --agent claude-code --global --yes" \
-        "npx skills@latest add mattpocock/skills --agent claude-code --global --yes"
+        "claude plugin update mattpocock-skills@claude-plugins-official" \
+        "claude plugin install mattpocock-skills@claude-plugins-official --scope user"
 
     add_plugin "pyright-lsp" \
         "Python Pyright LSP (official, project scope)" \
