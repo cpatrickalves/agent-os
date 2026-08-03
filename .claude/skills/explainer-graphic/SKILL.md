@@ -7,6 +7,7 @@ triggers:
   - explain this visually
   - create a graphic
 context: fork
+disable-model-invocation: true
 ---
 
 # Explainer Graphic
