@@ -5,7 +5,7 @@ export const meta = {
   phases: [
     { title: 'Development', detail: 'implementa o plano, commita e abre PR para a branch dev', model: 'sonnet' },
     { title: 'Code Review', detail: '3 revisores em paralelo (thermos + ce-code-review + matt-code-review, todos Opus) e consolidação dos relatórios' },
-    { title: 'PR Fixes', detail: 'julga cada achado, aplica as correções procedentes e atualiza o PR', model: 'sonnet' },
+    { title: 'PR Fixes', detail: 'verifica cada achado contra o código do PR, aplica as correções procedentes e atualiza o PR', model: 'opus' },
     { title: 'Docs Audit', detail: 'auditoria de documentação da branch com a skill docs-generator (sincronia /docs + ADRs/guides)', model: 'opus' },
   ],
 }
@@ -114,16 +114,22 @@ phase('PR Fixes')
 
 const fixes = await agent(
   contextoAutorizado('PR Fixes') +
-    `Três revisores independentes produziram o relatório consolidado em ${consolidated.report_path}. ` +
-    'Julgue cada achado: procedente, ou improcedente (falso positivo, premissa incorreta, ' +
-    'overengineering, fora do escopo do plano). Aplique as correções procedentes (pode usar ' +
+    `Três revisores independentes revisaram o PR ${dev.pr_url} e produziram o relatório de code review consolidado em ${consolidated.report_path}. ` +
+    'Julgue cada achado como procedente ou improcedente, verificando-o contra o código real antes de aceitar. Para cada achado: ' +
+    '(1) abra o diff/arquivos do PR referenciados e verifique se a premissa procede no código real; ' +
+    '(2) verifique se a correção sugerida quebraria funcionalidade existente ou ignora uma razão legítima da implementação atual; ' +
+    '(3) para sugestões de "implementar direito"/generalizar, grep no codebase — se nada usa, marque como overengineering (YAGNI); ' +
+    '(4) se não for possível verificar um achado com o código disponível, não aplique a correção — ' +
+    'registre-o entre os rejeitados com o motivo "não verificável". ' +
+    'São improcedentes: falsos positivos, premissas incorretas, overengineering e itens fora do escopo do plano. ' +
+    'Aplique as correções procedentes (pode usar ' +
     'subagents, um foco por subagent), rode os validadores do repositório, commite e faça push ' +
     `para a branch ${dev.branch}, e comente no PR listando somente os fixes aplicados e suas ` +
     'justificativas (não precisa mencionar os rejeitados).',
   {
     label: 'pr-fixes',
     phase: 'PR Fixes',
-    model: 'sonnet',
+    model: 'opus',
     schema: {
       type: 'object',
       properties: {

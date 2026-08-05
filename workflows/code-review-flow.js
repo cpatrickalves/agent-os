@@ -5,7 +5,7 @@ export const meta = {
     'Quando quiser revisar um PR existente sem implementar nada. Uso: Workflow({name: "code-review-flow", args: "<PR url ou número>"})',
   phases: [
     { title: 'Code Review', detail: '3 revisores em paralelo (thermos + ce-code-review + matt-code-review, todos Opus) e consolidação dos relatórios' },
-    { title: 'Final Review', detail: 'julga os achados com grill-with-docs e gera o relatório final em markdown + HTML (html-it) na raiz do projeto', model: 'opus' },
+    { title: 'Final Review', detail: 'verifica cada achado contra o código do PR e gera o relatório final em markdown + HTML (html-it) na raiz do projeto', model: 'opus' },
   ],
 }
 
@@ -74,10 +74,14 @@ const finalReview = await agent(
   `Você executa a etapa "Final Review" do workflow code-review-flow, que o usuário pediu para ` +
     `rodar sobre o PR ${prRef}. Três revisores independentes produziram o relatório consolidado ` +
     `em ${consolidated.report_path}. ` +
-    'Use a skill /grill-with-docs e julgue cada achado: procedente, ou improcedente ' +
-    '(falso positivo, premissa incorreta, overengineering, etc.). ' +
+    'Julgue cada achado como procedente ou improcedente, verificando-o contra o código real antes de aceitar. Para cada achado: ' +
+    '(1) abra o diff/arquivos do PR referenciados e verifique se a premissa procede no código real; ' +
+    '(2) verifique se a correção sugerida quebraria funcionalidade existente ou ignora uma razão legítima da implementação atual; ' +
+    '(3) para sugestões de "implementar direito"/generalizar, grep no codebase — se nada usa, marque como overengineering (YAGNI); ' +
+    '(4) se não for possível verificar um achado com o código disponível, registre-o em uma seção "Não verificáveis" do relatório ' +
+    'em vez de aceitá-lo ou descartá-lo. ' +
     `Após o julgamento, gere o relatório final em markdown na raiz do projeto, com o nome "pr-review-${prId}.md". ` +
-    'IMPORTANTE: o documento final deve conter APENAS os itens que devem ser corrigidos (os achados procedentes); ' +
+    'IMPORTANTE: o documento final deve conter os itens que devem ser corrigidos (os achados procedentes) e, se houver, a seção "Não verificáveis"; ' +
     'não inclua os achados descartados/rejeitados (overengineering, premissas incorretas, falsos positivos, etc.). ' +
     `Em seguida use a skill /html-it para gerar uma versão HTML do "pr-review-${prId}.md" (para melhor legibilidade) também na raiz do projeto. ` +
     'Este workflow não altera o PR: nenhum commit, push ou comentário — apenas os dois arquivos de relatório. ' +
