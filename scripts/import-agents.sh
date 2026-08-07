@@ -23,7 +23,7 @@ VERBOSE="false"
 IMPORT_ALL="false"
 OVERWRITE="false"
 
-AGENTS_SOURCE="$HOME/dev-os/.claude/agents"
+AGENTS_SOURCE="$HOME/dev-os/agents"
 AGENTS_DEST="$PROJECT_DIR/.claude/agents"
 
 # Agents installed globally (user-level) instead of into the project.
