@@ -24,7 +24,6 @@ Reusable skill modules that extend Claude Code with specialized knowledge and wo
 | `python-cashews-cache` | Python | Async caching with cashews library and diskcache backend |
 | `frontend-design` | Frontend | Create distinctive, production-grade frontend interfaces |
 | `copywriting` | Frontend | Write and improve marketing copy for web pages |
-| `vercel-react-best-practices` | Frontend | React/Next.js performance optimization (57 rules across 8 categories) |
 | `sop-creator` | Operations | Create runbooks, playbooks, and technical documentation |
 | `competitors-analysis` | Operations | Evidence-based competitor analysis from actual cloned code |
 | `azure-devops-cli` | Operations | Azure DevOps resource management via CLI |
