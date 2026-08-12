@@ -9,16 +9,16 @@ Rightsize a prompt or context document for Claude 5-generation models (Opus 5, F
 
 ## Steps
 
-1. **Read the target document in full.** Identify its type (system prompt, CLAUDE.md, skill, tool/agent description, spec), then read [`references/document-types.md`](references/document-types.md) for what that type should and should not carry.
-2. **Audit line by line against the six shifts below.** Mark every line with one verdict: **keep** (earns its load), **rewrite** (right idea, over-constrained wording), **delete** (no-op, stale, redundant, or discoverable from the environment), or **disclose** (live, but only some runs need it — move behind a pointer).
-3. **Apply the verdicts.** Rewrite in place; for *disclose* verdicts, move the material to a separate file and leave a one-line pointer that states what the file is and when to reach it.
-4. **Report.** Show before/after size, and list every deletion and rewrite with the shift that justified it, so the user can veto line by line.
+1. **Read the target document in full.** Identify its type (system prompt, CLAUDE.md, skill, tool/agent description, spec), then read [`references/document-types.md`](references/document-types.md) for what that type should and should not carry. If no target is named, map everything the workspace actually loads as context — CLAUDE.md files, skills, rules, memory indexes — and audit that set, excluding generated output, dependency folders, and version-control internals.
+2. **Audit line by line against the six shifts below.** Judge each line against the principle, not surface patterns — the wordings in the rubric are illustrations, and a line can look innocent and still break a shift. Mark every line with one verdict: **keep** (earns its load), **rewrite** (right idea, over-constrained wording), **delete** (no-op, stale, redundant, or discoverable from the environment), or **disclose** (live, but only some runs need it — move behind a pointer).
+3. **Report before touching anything.** For every rewrite, delete, and disclose verdict, quote the actual passage and name the shift that justifies it; show estimated before/after size. Change nothing until the user approves.
+4. **Apply the approved verdicts.** Rewrite in place; for *disclose* verdicts, move the material to a separate file and leave a one-line pointer that states what the file is and when to reach it.
 
-Done means every line of the original is accounted for by a verdict — no line skipped, no verdict applied silently.
+Done means every line of the original is accounted for by a verdict and every applied change was approved — no line skipped, no edit made silently.
 
 ## The six shifts (audit rubric)
 
-**1. Rules → Judgement.** Absolute prohibitions ("never", "DO NOT", all-caps warnings) existed to stop worst cases in older models, and are wrong for some subset of prompts. Rewrite each as a principle that states the target behavior — *"default to no comments; never write multi-line blocks"* becomes *"write code that reads like the surrounding code: match its comment density"*. Keep a hard rule only where a wrong action is irreversible (data loss, external side effects).
+**1. Rules → Judgement.** Absolute prohibitions ("never", "DO NOT", all-caps warnings) existed to stop worst cases in older models, and are wrong for some subset of prompts. Rewrite each as a principle that states the target behavior — *"default to no comments; never write multi-line blocks"* becomes *"write code that reads like the surrounding code: match its comment density"*. Keep a hard rule only where a wrong call is genuinely costly (data loss, external side effects, money, approvals, backups) — those are legitimately hard, so keep them and never propose softening them.
 
 **2. Examples → Interfaces.** Worked examples constrain the model's exploration space. Delete them and make the interface expressive instead: enum values that hint at usage (`pending | in_progress | completed`), one-line constraints (*"only one task in_progress at a time"*), parameter names that carry meaning.
 
