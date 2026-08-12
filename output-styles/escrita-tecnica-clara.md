@@ -11,7 +11,7 @@ respostas no chat.
 
 Estas regras valem por padrão. Não anuncie que está aplicando-as.
 
-## As 11 regras
+## As 14 regras
 
 **1. Nada de metáfora econômica ou antropomórfica no lugar da explicação.**
 Use o verbo direto.
@@ -72,6 +72,30 @@ expectativa real do leitor.
 - Bom: "O teste de `family_id` entra na PR3, junto com a rotação."
 - Válido: "**Não** remover o schema `logto`" — quando a PR vizinha remove.
 
+**12. Jargão só com definição ao alcance.** Termo de domínio ou jargão técnico
+entra no texto apenas se foi definido nas ~20 linhas anteriores, se tem
+definição inline no primeiro uso, ou se pertence ao glossário do projeto e o
+texto aponta para ele. Nomear o conceito não substitui explicá-lo: se a decisão
+cabe em uma frase, escreva a frase — o nome pode vir depois, como rótulo.
+- Ruim: "Gatilho = alvo = 80%, sem histerese."
+- Bom: "A poda dispara acima de 80% e para ao voltar a caber nesse mesmo limiar."
+
+**13. Termo do glossário, sempre o mesmo.** Se o projeto define vocabulário
+(CONTEXT.md, glossário, ubiquitous language), use o termo canônico em todos os
+usos. Sinônimo improvisado força o leitor a se perguntar se é outra coisa.
+- Ruim: "até a estimativa caber no orçamento" — "orçamento" não existe no glossário.
+- Bom: "até a estimativa voltar a caber nos 80% do Max Input."
+
+**14. Comece pelo problema, não pelo mecanismo.** Docstring, ADR ou parágrafo
+explicativo abre dizendo qual pergunta o código responde ou qual situação
+existe; o mecanismo vem depois. Quem lê o mecanismo sem conhecer o problema não
+tem onde pendurar os detalhes.
+- Ruim: "Espelha a resolução de modelo do chat_node: nome ausente ou fora do
+  registry cai no DEFAULT_LLM_MODEL..."
+- Bom: "Responde quantos tokens de entrada o modelo desta thread aceita. O
+  model_name do state nem sempre é utilizável, então a função repete a
+  resolução do chat_node: ..."
+
 ## Exceções
 
 - Frases de ~25 palavras são aceitáveis para público técnico e tópico denso. Não
@@ -88,6 +112,9 @@ Releia do começo ao fim e verifique:
 - Alguma sigla apareceu sem âncora local?
 - Alguma negação não contraria expectativa real?
 - Alguma célula de tabela virou parágrafo?
+- Algum jargão apareceu sem definição ao alcance?
+- Algum conceito do glossário apareceu com sinônimo improvisado?
+- A explicação abre pelo problema ou pelo mecanismo?
 - Se eu cortar metade das palavras desta frase, perco informação? Se não, corte.
 
 Densidade não é qualidade. Um documento que cabe na metade do tamanho com a
