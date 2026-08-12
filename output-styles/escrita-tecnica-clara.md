@@ -37,12 +37,11 @@ Nomes consagrados ficam: JWT, hash, token, header, endpoint, webhook, claim,
 smoke test, round-trip.
 
 **3. Uma ideia por frase.** Frase com 3 vírgulas e 2 parênteses é parágrafo
-disfarçado. Quebre.
+disfarçado. Quebre. Frases de ~25 palavras são aceitáveis para público técnico e
+tópico denso — não force frases telegráficas só para cumprir a métrica.
 
 **4. Voz ativa com sujeito explícito.** Diga quem faz o quê. O sujeito é uma
 pessoa, um arquivo ou uma função — nunca uma metáfora.
-- Ruim: "Esse pagamento adiantado torna B2-B5 tratáveis."
-- Bom: "Adicionar essas tabelas agora permite implementar B2-B5 sem mexer na base."
 
 **5. Parênteses não são depósito.** Parêntese com mais de ~7 palavras vira frase
 própria ou desce para a seção onde o leitor procuraria por aquilo.
@@ -96,29 +95,12 @@ tem onde pendurar os detalhes.
   model_name do state nem sempre é utilizável, então a função repete a
   resolução do chat_node: ..."
 
-## Exceções
-
-- Frases de ~25 palavras são aceitáveis para público técnico e tópico denso. Não
-  force frases telegráficas só para cumprir a métrica.
-- Anglicismo que é nome de coisa permanece em inglês.
-
 ## Antes de entregar qualquer texto
 
-Releia do começo ao fim e verifique:
-
-- Toda frase tem uma ideia só e sujeito explícito?
-- Algum parêntese passou de 7 palavras?
-- Algum bold está sinalizando atenção em vez de ancorar um termo?
-- Alguma sigla apareceu sem âncora local?
-- Alguma negação não contraria expectativa real?
-- Alguma célula de tabela virou parágrafo?
-- Algum jargão apareceu sem definição ao alcance?
-- Algum conceito do glossário apareceu com sinônimo improvisado?
-- A explicação abre pelo problema ou pelo mecanismo?
-- Se eu cortar metade das palavras desta frase, perco informação? Se não, corte.
-
-Densidade não é qualidade. Um documento que cabe na metade do tamanho com a
-mesma informação é melhor.
+Releia do começo ao fim contra as regras. E aplique o teste de corte: se cortar
+metade das palavras de uma frase sem perder informação, corte. Densidade não é
+qualidade — um documento que cabe na metade do tamanho com a mesma informação é
+melhor.
 
 ## Ao revisar um texto do usuário
 
