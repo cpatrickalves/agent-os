@@ -10,6 +10,7 @@
 - [States](#states)
 - [Documents](#documents)
 - [Comments](#comments)
+- [Intake](#intake)
 - [Users](#users)
 - [Cache](#cache)
 
@@ -24,6 +25,23 @@
 | `--help` / `-h` | Show help |
 
 Environment variable `PLANECLI_NO_CACHE=1` disables cache globally.
+
+### Command aliases
+
+| Full | Aliases |
+|---|---|
+| `work-item` | `wi`, `issues`, `issue` |
+| `project` | `projects` |
+| `document` | `doc`, `docs`, `documents` |
+| `comment` | `comments` |
+| `module` | `modules` |
+| `label` | `labels` |
+| `state` | `states` |
+| `cycle` | `cycles` |
+| `user` | `users` |
+| `list` | `ls` |
+| `show` | `read` |
+| `create` | `new` |
 
 ## Work Items
 
@@ -55,7 +73,16 @@ planecli wi show ISSUE [OPTIONS]
 |---|---|
 | `ISSUE` | Work item identifier (ABC-123), UUID, or name (required) |
 | `--project` / `-p` | Project (required for name-based lookup) |
+| `--no-comments` | Skip fetching the work item's comments |
 | `--json` | JSON output |
+
+Bundles the work item's comments in the same call (chronological, oldest → newest;
+same data `comment ls` returns). In `--json` output, the `comments` field is a list
+(`[]` if there are none), or `null` if the comment fetch failed — the work item
+itself still returns and the command still exits 0. In human output, a `Comments`
+section follows the work item details, showing `(none)` or `(failed to load)` as
+appropriate. Pass `--no-comments` to skip the fetch entirely (the `comments` key is
+then omitted from JSON output).
 
 ### wi create
 
@@ -74,7 +101,7 @@ planecli wi create TITLE [OPTIONS]
 | `--module` | Module name or UUID |
 | `--parent` | Parent work item identifier (ABC-123) for sub-issues |
 | `--estimate` / `-e` | Story point estimate |
-| `--description` / `-d` | Description (plain text) |
+| `--description` / `-d` | Description. Stored as raw HTML, not markdown — see the Gotchas in SKILL.md |
 | `--json` | JSON output |
 
 ### wi update
@@ -93,7 +120,7 @@ planecli wi update ISSUE [OPTIONS]
 | `--labels` | Comma-separated labels to set |
 | `--clear-labels` | Remove all labels |
 | `--name` | New title |
-| `--description` / `-d` | New description |
+| `--description` / `-d` | New description. Stored as raw HTML, not markdown |
 | `--json` | JSON output |
 
 ### wi delete
@@ -256,11 +283,50 @@ planecli doc delete TITLE -p PROJECT
 Command group: `planecli comment` (alias: `comments`)
 
 ```
-planecli comment ls ISSUE [--project/-p PROJECT]
+planecli comment ls ISSUE [--project/-p PROJECT] [--limit/-l N]
 planecli comment create ISSUE --body "TEXT" [--project/-p PROJECT]
 planecli comment update COMMENT_ID --issue ISSUE --body "TEXT" [--project/-p PROJECT]
 planecli comment delete COMMENT_ID --issue ISSUE [--project/-p PROJECT]
 ```
+
+`--limit` (default 50) selects the **most recent** N comments, still rendered
+oldest → newest — not the first N chronologically. A limit of `0` or a negative
+value returns no comments (consistent with the `[:limit]` semantics used elsewhere,
+where `0` means "none").
+
+## Intake
+
+Command group: `planecli intake` (no alias)
+
+```
+planecli intake ls -p PROJECT
+planecli intake create NAME -p PROJECT [--description/-d TEXT] [--priority/-P PRIORITY]
+planecli intake accept ISSUE_ID -p PROJECT
+planecli intake decline ISSUE_ID -p PROJECT
+planecli intake delete ISSUE_ID -p PROJECT
+planecli intake enabled PROJECT
+```
+
+| Parameter | Description |
+|---|---|
+| `ISSUE_ID` | **Work item UUID** — the `Issue ID` column of `intake ls`, not the intake wrapper `Intake ID` |
+| `--project` / `-p` | Project name, identifier, or UUID (required on every subcommand except `enabled`, which takes the project as its argument) |
+| `--description` / `-d` | Item description, plain text (wrapped in a paragraph tag and HTML-escaped) |
+| `--priority` / `-P` | `none` (default), `low`, `medium`, `high`, `urgent` — an unknown value exits `5` |
+| `--json` | JSON output (all subcommands except `delete`) |
+
+Item `status` is reported as a label: `pending`, `rejected`, `snoozed`, `accepted`, `duplicate`.
+
+`accept` and `decline` **require the project Admin role**. Plane answers `HTTP 200` with the
+record unchanged for lower roles, so the CLI compares the returned status against the requested
+one and exits `4` ("the intake status was not changed") instead of reporting a false success.
+
+`delete` is destructive beyond the queue: for any status other than `accepted` it also
+**permanently deletes the underlying work item**. There is no confirmation prompt and no undo —
+use `decline` when the intent is only to reject the submission.
+
+`ls` returns an empty list when the project's intake view is off; `enabled` reports the same
+project flag (`intake_enabled`).
 
 ## Users
 
