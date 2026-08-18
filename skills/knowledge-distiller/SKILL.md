@@ -12,7 +12,7 @@ Princípio: **fidelidade ao autor**. Todo conteúdo vem do input; sua contribui�
 O documento tem três camadas, e o leitor volta a cada uma com frequência diferente:
 
 - **Essência** (topo) — o que se relê: tese, método compactado, vocabulário do autor. Cabe em uma tela.
-- **Seções** (corpo) — o que se lê uma vez com atenção: cada conceito com todo o contexto, exemplos e citações.
+- **Seções** (corpo) — o que se lê uma vez com atenção: cada conceito explicado em prosa, com contexto, exemplos e citações.
 - **Guia prático** (fim) — o que se consulta na hora de aplicar.
 
 A essência lista, as seções explicam, o guia aplica. O mesmo texto não se repete nas três.
@@ -21,7 +21,7 @@ A essência lista, as seções explicam, o guia aplica. O mesmo texto não se re
 
 1. **Ler tudo antes de escrever.** Percorra o input inteiro e liste: conceitos importantes, frases impactantes candidatas a citação, exemplos/histórias/casos, metodologias/frameworks, termos que o autor cunha ou redefine, objeções que ele responde, obras/pessoas/fontes que ele cita. Concluído quando cada conceito do autor está na lista junto com **todo o contexto** em que ele aparece.
 2. **Mapear a estrutura.** Agrupe os conceitos pela similaridade natural do próprio autor, respeitando a ordem do pensamento dele. Cada grupo recebe um título **outlier** (fora da curva) em H1 que captura a essência única daquela seção. Concluído quando cada item da lista pertence a um grupo.
-3. **Escrever cada seção** na estrutura abaixo, aplicando as regras de síntese, citação e vocabulário. Concluído quando cada item da lista aparece na sua seção.
+3. **Escrever cada seção** na estrutura abaixo, aplicando as regras de síntese, escrita, citação e vocabulário. Concluído quando cada item da lista aparece na sua seção.
 4. **Escrever o guia prático** como seção final.
 5. **Escrever a essência por último** — ela resume o que você já escreveu — e posicioná-la no topo, logo após a fonte.
 6. **Checagem final** com o checklist antes de entregar.
@@ -40,11 +40,16 @@ A essência lista, as seções explicam, o guia aplica. O mesmo texto não se re
 
 # [Título outlier do grupo 1]
 
-## [Subseção]
-- Síntese em bullets, com **negrito** nos pontos-chave
-- Exemplo/história do autor
+## [Subseção: um conceito]
+Parágrafo que abre pelo problema ou pergunta que o conceito responde e
+explica a ideia do autor com o contexto que ele deu.
 
 > "Citação traduzida." — contexto breve
+
+Parágrafo com o exemplo ou história do autor e o que ele conclui a partir dele.
+
+- Etapa 1 do método do autor [bullets só quando o autor enumera]
+- Etapa 2
 
 # [Título outlier do grupo N]
 ...
@@ -66,7 +71,22 @@ A essência lista, as seções explicam, o guia aplica. O mesmo texto não se re
 - Cada conceito entra com **todo o contexto** que o autor deu: nuances, qualificações e refinamentos; exemplos, histórias e casos; metodologias completas — todas as etapas, na ordem do autor.
 - Registre **objeções e respostas juntas**: quando o autor antecipa uma crítica ("as pessoas dizem X, mas..."), responde a uma pergunta da plateia ou corrige um erro comum de quem aplica a ideia, o par objeção → resposta é o trecho que mais protege o leitor de aplicar errado. Ele fica na seção do conceito e alimenta o "O que evitar" do guia.
 - Incerteza do autor é conteúdo: "acho que foi em 2015" continua "acho que foi em 2015"; "se não me engano" e "provavelmente" permanecem.
-- **Negrito** em poucos pontos por bullet — mais que isso, deixa de destacar.
+
+## Regras de escrita
+
+O corpo é texto explicativo, lido de ponta a ponta. Escreva como quem explica a ideia a um colega, em prosa corrida:
+
+- **Parágrafos curtos, de 2 a 4 frases**, cada um em torno de uma ideia. Um conceito costuma caber em um ou dois parágrafos mais a citação.
+- **Comece pelo problema.** A subseção abre dizendo qual pergunta o conceito responde ou qual situação o autor observou; o mecanismo e as etapas vêm depois. Quem lê o mecanismo sem conhecer o problema não tem onde pendurar os detalhes.
+- **Uma ideia por frase**, voz ativa, sujeito explícito — o autor, a pessoa do exemplo ou o conceito. Frases de até ~25 palavras; frase com três vírgulas e dois parênteses é parágrafo disfarçado, quebre.
+- **Bullets só para enumeração**: as etapas de um método, uma lista de quatro ou mais itens que o autor dá, e as listas do guia prático. Explicação, exemplo e argumento ficam em parágrafo.
+- **Parênteses de até ~7 palavras.** O que passa disso vira frase própria. Exceção: o termo original do autor na primeira ocorrência.
+- **Negrito só como âncora**: o termo do autor na primeira ocorrência e o nome de um conceito referenciado depois. Ênfase vem da frase, e o leitor pula o que está em negrito demais.
+- **Português natural.** Traduza anglicismos que têm equivalente natural (*framework* pode ficar; *upfront*, *insight*, *trade-off* viram adiantado, percepção, compromisso). Termos que o autor cunha seguem a regra de vocabulário abaixo.
+- **Afirme o que acontece.** Negação só quando contraria uma expectativa real do leitor.
+- **Metáfora só do autor.** As metáforas e analogias do autor entram como citação ou vocabulário dele. No texto que você escreve entre elas, use o verbo direto: "o autor adia a decisão", e não "a decisão paga juros". Metáfora sua se mistura à do autor e o leitor deixa de saber de quem é.
+
+Ao terminar, aplique o teste de corte em cada parágrafo: se metade das palavras sai sem perder informação, corte.
 
 ## Citações diretas
 
@@ -79,7 +99,7 @@ Priorize citações que revelam:
 - definições únicas de conceitos conhecidos
 - metáforas e analogias poderosas
 
-Uma frase entra como citação **ou** como bullet, não como os dois. Se a formulação do autor já é clara, use a citação e deixe o bullet para o que ela não diz sozinha: quando foi dita, sobre o quê, qual o mecanismo por trás.
+Uma frase entra como citação **ou** no parágrafo, não como os dois. Se a formulação do autor já é clara, use a citação e deixe o parágrafo para o que ela não diz sozinha: quando foi dita, sobre o quê, qual o mecanismo por trás. A citação fica logo após o parágrafo que ela sustenta, para o leitor ler os dois como um só trecho.
 
 Toda citação traz um contexto breve após o travessão. Se o input tem marcadores de tempo, número de página ou de capítulo, inclua-os nesse contexto: o leitor consegue conferir a fonte em segundos.
 
@@ -111,7 +131,10 @@ Se o autor menciona livros, artigos, pessoas, palestras ou ferramentas, reúna-o
 - Cada H1 é um título outlier?
 - A essência cabe em uma tela e só lista o que o corpo explica?
 - Cada termo do autor tem uma única tradução, com o original na primeira ocorrência?
-- Alguma frase aparece como bullet e como citação? Escolha uma.
+- Alguma frase aparece no parágrafo e como citação? Escolha uma.
+- O corpo se lê como prosa corrida? Cada bullet fora do guia é uma enumeração do autor? Cada negrito é um termo ou âncora?
+- Alguma frase precisou de duas leituras? Quebre-a. Algum parênteses passou de ~7 palavras? Vire frase.
+- Alguma metáfora ou analogia no texto é sua, e não do autor? Troque pelo verbo direto.
 - O guia tem as quatro partes e marca os cenários que são seus?
 
 ## Entrega
