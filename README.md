@@ -94,5 +94,8 @@ The skills cover the full stack I work with daily — from FastAPI backends and 
 2. Open it with Claude Code — skills, commands, and agents auto-load via the `.claude/` symlinks
 3. From any other project, run the import scripts to install assets:
    `~/dev-os/scripts/import-skills.sh`, `import-commands.sh`, `import-agents.sh` (per-project),
-   `import-workflows.sh`, `import-output-styles.sh` (global, into `~/.claude/`)
+   `import-workflows.sh`, `import-output-styles.sh` (global, into `~/.claude/`).
+   A few assets always install globally regardless of script: the skills listed in
+   `GLOBAL_SKILLS` (`import-skills.sh`) and the commands in `GLOBAL_COMMANDS`
+   (`import-commands.sh`, e.g. `/end-session`) go to `~/.claude/` so every project sees them.
 4. Use `/create-simple-feature-tasks` to break down a feature, `/pr-summary` to summarize changes, or any other command

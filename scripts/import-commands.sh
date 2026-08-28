@@ -26,6 +26,11 @@ OVERWRITE="false"
 COMMANDS_SOURCE="$HOME/dev-os/commands"
 COMMANDS_DEST="$PROJECT_DIR/.claude/commands"
 
+# Commands installed globally (user-level) instead of into the project.
+# These are copied to $GLOBAL_COMMANDS_DEST so they are available in every project.
+GLOBAL_COMMANDS_DEST="$HOME/.claude/commands"
+declare -a GLOBAL_COMMANDS=("end-session.md")
+
 # Arrays for command handling
 declare -a COMMAND_FILES
 declare -a COMMAND_NAMES
@@ -111,6 +116,28 @@ validate_commands_source() {
     fi
 
     print_verbose "Found $count command file(s) in source"
+}
+
+# Return 0 if the given command (by source filename) installs globally.
+is_global_command() {
+    local command="$1"
+    local g
+    for g in "${GLOBAL_COMMANDS[@]}"; do
+        if [[ "$command" == "$g" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Echo the destination commands root for the given command.
+command_dest_dir() {
+    local command="$1"
+    if is_global_command "$command"; then
+        echo "$GLOBAL_COMMANDS_DEST"
+    else
+        echo "$COMMANDS_DEST"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -204,7 +231,7 @@ check_existing_commands() {
     local conflicts=()
 
     for command in "${SELECTED_COMMANDS[@]}"; do
-        if [[ -f "$COMMANDS_DEST/$command" ]]; then
+        if [[ -f "$(command_dest_dir "$command")/$command" ]]; then
             conflicts+=("$command")
         fi
     done
@@ -278,17 +305,29 @@ check_existing_commands() {
 # -----------------------------------------------------------------------------
 
 execute_import() {
-    mkdir -p "$COMMANDS_DEST"
-
-    local import_count=0
+    local local_count=0
+    local global_count=0
     for command in "${SELECTED_COMMANDS[@]}"; do
-        cp "$COMMANDS_SOURCE/$command" "$COMMANDS_DEST/"
-        import_count=$((import_count + 1))
-        print_verbose "Imported: ${command%.md}"
+        local dest_dir
+        dest_dir="$(command_dest_dir "$command")"
+        mkdir -p "$dest_dir"
+        cp "$COMMANDS_SOURCE/$command" "$dest_dir/"
+        if is_global_command "$command"; then
+            global_count=$((global_count + 1))
+            print_verbose "Imported (global): ${command%.md} -> $dest_dir/"
+        else
+            local_count=$((local_count + 1))
+            print_verbose "Imported (local): ${command%.md} -> $dest_dir/"
+        fi
     done
 
     echo ""
-    print_success "Imported $import_count command(s) to .claude/commands/"
+    if [[ "$local_count" -gt 0 ]]; then
+        print_success "Imported $local_count command(s) to $COMMANDS_DEST/"
+    fi
+    if [[ "$global_count" -gt 0 ]]; then
+        print_success "Imported $global_count command(s) globally to $GLOBAL_COMMANDS_DEST/"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -310,7 +349,8 @@ main() {
     # Show summary
     echo ""
     print_status "Source: $COMMANDS_SOURCE"
-    print_status "Destination: $COMMANDS_DEST"
+    print_status "Destination (local): $COMMANDS_DEST"
+    print_status "Destination (global): $GLOBAL_COMMANDS_DEST (${GLOBAL_COMMANDS[*]%.md})"
     echo ""
     print_status "Available commands: ${#COMMAND_FILES[@]}"
     echo ""
