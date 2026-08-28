@@ -38,3 +38,10 @@ npx skills@latest add shadcn/ui --agent claude-code --skill '*' --yes --project
 # Frontend slides https://github.com/zarazhangrui/frontend-slides
 claude plugin marketplace add zarazhangrui/frontend-slides
 claude plugin install frontend-slides@frontend-slides --scope project
+
+### Curated skills copied by hand
+# unslop (source: cursor/plugins, pstack plugin)
+curl -sL https://raw.githubusercontent.com/cursor/plugins/main/pstack/skills/unslop/SKILL.md \
+  -o ~/dev-os/skills/unslop/SKILL.md
+# Note: the frontmatter description is rewritten locally to follow the repo's
+# trigger-phrase convention. Re-apply it after any upstream refresh.

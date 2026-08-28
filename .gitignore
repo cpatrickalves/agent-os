@@ -180,3 +180,4 @@ pyrightconfig.json
 .DS_Store
 .idea
 .plans
+.claude/napkin.md
