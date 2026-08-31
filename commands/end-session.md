@@ -1,7 +1,6 @@
 ---
 description: End session
-model: claude-haiku-4-5
-context: fork
+model: sonnet
 disable-model-invocation: true
 ---
 
