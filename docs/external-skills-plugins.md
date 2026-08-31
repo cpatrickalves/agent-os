@@ -45,3 +45,5 @@ curl -sL https://raw.githubusercontent.com/cursor/plugins/main/pstack/skills/uns
   -o ~/dev-os/skills/unslop/SKILL.md
 # Note: the frontmatter description is rewritten locally to follow the repo's
 # trigger-phrase convention. Re-apply it after any upstream refresh.
+# Installed globally: listed in GLOBAL_SKILLS in scripts/import-skills.sh, so
+# import-skills.sh copies it to ~/.claude/skills/ instead of into the project.
