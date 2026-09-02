@@ -1,7 +1,6 @@
 ---
 description: Create or update CHANGELOG.md (Keep a Changelog) and tag the release
 argument-hint: "[version]"
-context: fork
 disable-model-invocation: true
 ---
 
